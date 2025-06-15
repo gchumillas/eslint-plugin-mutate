@@ -22,14 +22,22 @@ module.exports = {
               ['push', 'pop', 'shift', 'unshift', 'splice', 'sort', 'reverse', 'fill'].includes(node.callee.property.name));
     }
     
+    function getRootObjectName(memberExpression) {
+      let current = memberExpression;
+      while (current.object && current.object.type === 'MemberExpression') {
+        current = current.object;
+      }
+      return current.object && current.object.type === 'Identifier' ? current.object.name : null;
+    }
+    
     function isParameterMutation(node, paramNames) {
       if (node.type === 'AssignmentExpression' && node.left.type === 'MemberExpression') {
-        const objectName = node.left.object.name;
+        const objectName = getRootObjectName(node.left) || node.left.object.name;
         return paramNames.has(objectName);
       }
       
       if (node.type === 'UpdateExpression' && node.argument.type === 'MemberExpression') {
-        const objectName = node.argument.object.name;
+        const objectName = getRootObjectName(node.argument) || node.argument.object.name;
         return paramNames.has(objectName);
       }
       
@@ -73,40 +81,46 @@ module.exports = {
       
       // Detectar mutaciones
       'AssignmentExpression, UpdateExpression, CallExpression'(node) {
-        // Encontrar la función contenedora
-        let currentFunction = null;
+        // Encontrar todas las funciones contenedoras (para manejar funciones anidadas)
+        const containingFunctions = [];
         let parent = node.parent;
         
         while (parent) {
           if (parent.type === 'FunctionDeclaration' || 
               parent.type === 'FunctionExpression' || 
               parent.type === 'ArrowFunctionExpression') {
-            currentFunction = parent;
-            break;
+            containingFunctions.push(parent);
           }
           parent = parent.parent;
         }
         
-        if (!currentFunction || !functionScopes.has(currentFunction)) {
+        if (containingFunctions.length === 0) {
           return;
         }
         
-        const scope = functionScopes.get(currentFunction);
-        const paramNames = new Set(scope.params.keys());
-        
-        if (isMutatingOperation(node) && isParameterMutation(node, paramNames)) {
-          let mutatedParamName = null;
-          
-          if (node.type === 'AssignmentExpression' && node.left.type === 'MemberExpression') {
-            mutatedParamName = node.left.object.name;
-          } else if (node.type === 'UpdateExpression' && node.argument.type === 'MemberExpression') {
-            mutatedParamName = node.argument.object.name;
-          } else if (node.type === 'CallExpression' && node.callee.type === 'MemberExpression') {
-            mutatedParamName = node.callee.object.name;
+        // Verificar la mutación en todas las funciones contenedoras
+        for (const currentFunction of containingFunctions) {
+          if (!functionScopes.has(currentFunction)) {
+            continue;
           }
           
-          if (mutatedParamName && scope.params.has(mutatedParamName)) {
-            scope.mutatedParams.add(mutatedParamName);
+          const scope = functionScopes.get(currentFunction);
+          const paramNames = new Set(scope.params.keys());
+          
+          if (isMutatingOperation(node) && isParameterMutation(node, paramNames)) {
+            let mutatedParamName = null;
+            
+            if (node.type === 'AssignmentExpression' && node.left.type === 'MemberExpression') {
+              mutatedParamName = getRootObjectName(node.left) || node.left.object.name;
+            } else if (node.type === 'UpdateExpression' && node.argument.type === 'MemberExpression') {
+              mutatedParamName = getRootObjectName(node.argument) || node.argument.object.name;
+            } else if (node.type === 'CallExpression' && node.callee.type === 'MemberExpression') {
+              mutatedParamName = node.callee.object.name;
+            }
+            
+            if (mutatedParamName && scope.params.has(mutatedParamName)) {
+              scope.mutatedParams.add(mutatedParamName);
+            }
           }
         }
       },
