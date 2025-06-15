@@ -1,0 +1,24 @@
+{
+  "name": "eslint-plugin-mutate",
+  "version": "1.0.0",
+  "description": "ESLint plugin to enforce mutation awareness by requiring 'mut' prefix for mutable parameters",
+  "main": "index.js",
+  "keywords": [
+    "eslint",
+    "plugin",
+    "mutation",
+    "immutable",
+    "javascript"
+  ],
+  "author": "Tu Nombre",
+  "license": "MIT",
+  "peerDependencies": {
+    "eslint": ">=7.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.0.0"
+  },
+  "engines": {
+    "node": ">=12.0.0"
+  }
+}
