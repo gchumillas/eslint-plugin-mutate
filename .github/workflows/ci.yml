@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [14.x, 16.x, 18.x, 20.x]
+        
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run tests
+      run: npm test
+      
+    - name: Test plugin integration
+      run: |
+        echo "Testing plugin installation..."
+        npm pack
+        cd test-project-temp
+        npm init -y
+        npm install ../eslint-plugin-mutate-*.tgz
+        npm install eslint
+        echo "module.exports = { plugins: ['mutate'], rules: { 'mutate/require-mut-prefix': 'error' } };" > .eslintrc.js
+        echo "function test(user) { user.name = 'test'; }" > test.js
+        npx eslint test.js && exit 1 || echo "✅ Plugin correctly detected mutation error"
+        cd ..
+        
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Lint code
+      run: npx eslint . --ext .js
+      
+  compatibility:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        eslint-version: ['7.0.0', '8.0.0', '8.50.0']
+        
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.x'
+        
+    - name: Install specific ESLint version
+      run: |
+        npm install eslint@${{ matrix.eslint-version }}
+        npm install mocha
+        
+    - name: Run tests with ESLint ${{ matrix.eslint-version }}
+      run: npm test
