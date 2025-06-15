@@ -21,7 +21,11 @@
   },
   "scripts": {
     "test": "mocha tests/**/*.test.js",
-    "test:watch": "mocha tests/**/*.test.js --watch"
+    "test:watch": "mocha tests/**/*.test.js --watch",
+    "test:rule": "mocha tests/rules/require-mut-prefix.test.js",
+    "test:plugin": "mocha tests/plugin.test.js",
+    "test:edge": "mocha tests/rules/edge-cases.test.js",
+    "test:single": "mocha"
   },
   "engines": {
     "node": ">=12.0.0"
