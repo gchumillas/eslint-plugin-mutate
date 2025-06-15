@@ -11,7 +11,7 @@ module.exports = {
   },
 
   create(context) {
-    // Almacena información sobre parámetros y sus mutaciones por función
+    // Store information about parameters and their mutations per function
     const functionScopes = new Map();
     
     function isMutatingOperation(node) {
@@ -61,12 +61,12 @@ module.exports = {
     }
     
     return {
-      // Detectar cuando entramos en una función
+      // Detect when entering a function
       'FunctionDeclaration, FunctionExpression, ArrowFunctionExpression'(node) {
         const params = new Map();
         const mutatedParams = new Set();
         
-        // Recopilar parámetros
+        // Collect parameters
         node.params.forEach(param => {
           if (param.type === 'Identifier') {
             params.set(param.name, {
@@ -79,9 +79,9 @@ module.exports = {
         functionScopes.set(node, { params, mutatedParams });
       },
       
-      // Detectar mutaciones
+      // Detect mutations
       'AssignmentExpression, UpdateExpression, CallExpression'(node) {
-        // Encontrar todas las funciones contenedoras (para manejar funciones anidadas)
+        // Find all containing functions (to handle nested functions)
         const containingFunctions = [];
         let parent = node.parent;
         
@@ -98,7 +98,7 @@ module.exports = {
           return;
         }
         
-        // Verificar la mutación en todas las funciones contenedoras
+        // Check mutation in all containing functions
         for (const currentFunction of containingFunctions) {
           if (!functionScopes.has(currentFunction)) {
             continue;
@@ -125,7 +125,7 @@ module.exports = {
         }
       },
       
-      // Al salir de la función, verificar si hay parámetros mutados sin prefijo
+      // When exiting a function, check if there are mutated parameters without prefix
       'FunctionDeclaration, FunctionExpression, ArrowFunctionExpression:exit'(node) {
         const scope = functionScopes.get(node);
         if (!scope) return;
@@ -140,7 +140,7 @@ module.exports = {
           }
         });
         
-        // Limpiar el scope
+        // Clean up the scope
         functionScopes.delete(node);
       }
     };

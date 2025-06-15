@@ -1,59 +1,59 @@
-// ❌ MAL - El parámetro se muta pero no tiene prefijo 'mut'
+// ❌ BAD - Parameter is mutated but doesn't have 'mut' prefix
 function doSomething(user) {
-  user.registered = true; // ESLint reportará error aquí
+  user.registered = true; // ESLint will report error here
 }
 
 function addItem(list, item) {
-  list.push(item); // ESLint reportará error aquí
+  list.push(item); // ESLint will report error here
 }
 
 function updateCounter(counter) {
-  counter.value++; // ESLint reportará error aquí
+  counter.value++; // ESLint will report error here
 }
 
-// ✅ BIEN - Los parámetros mutados tienen prefijo 'mut'
+// ✅ GOOD - Mutated parameters have 'mut' prefix
 function doSomethingCorrect(mutUser) {
-  mutUser.registered = true; // ✓ Correcto
+  mutUser.registered = true; // ✓ Correct
 }
 
 function addItemCorrect(mutList, item) {
-  mutList.push(item); // ✓ Correcto
+  mutList.push(item); // ✓ Correct
 }
 
 function updateCounterCorrect(mutCounter) {
-  mutCounter.value++; // ✓ Correcto
+  mutCounter.value++; // ✓ Correct
 }
 
-// ✅ BIEN - Los parámetros no se mutan, no necesitan prefijo
+// ✅ GOOD - Parameters are not mutated, no prefix needed
 function readUserData(user) {
-  return user.name; // ✓ Correcto, solo lectura
+  return user.name; // ✓ Correct, read-only
 }
 
 function calculateTotal(items) {
-  return items.reduce((sum, item) => sum + item.price, 0); // ✓ Correcto, solo lectura
+  return items.reduce((sum, item) => sum + item.price, 0); // ✓ Correct, read-only
 }
 
-// ✅ BIEN - Crear nuevos objetos es correcto
+// ✅ GOOD - Creating new objects is correct
 function updateUser(user, newData) {
-  return { ...user, ...newData }; // ✓ Correcto, no muta el original
+  return { ...user, ...newData }; // ✓ Correct, doesn't mutate the original
 }
 
-// Ejemplos de métodos que el plugin detecta como mutación:
+// Examples of methods that the plugin detects as mutation:
 function testMutatingMethods(mutArray, mutObj) {
-  // Métodos de array que mutan:
-  mutArray.push(1);      // ✓ Correcto con prefijo mut
-  mutArray.pop();        // ✓ Correcto con prefijo mut
-  mutArray.shift();      // ✓ Correcto con prefijo mut
-  mutArray.unshift(0);   // ✓ Correcto con prefijo mut
-  mutArray.splice(1, 1); // ✓ Correcto con prefijo mut
-  mutArray.sort();       // ✓ Correcto con prefijo mut
-  mutArray.reverse();    // ✓ Correcto con prefijo mut
-  mutArray.fill(0);      // ✓ Correcto con prefijo mut
+  // Array methods that mutate:
+  mutArray.push(1);      // ✓ Correct with mut prefix
+  mutArray.pop();        // ✓ Correct with mut prefix
+  mutArray.shift();      // ✓ Correct with mut prefix
+  mutArray.unshift(0);   // ✓ Correct with mut prefix
+  mutArray.splice(1, 1); // ✓ Correct with mut prefix
+  mutArray.sort();       // ✓ Correct with mut prefix
+  mutArray.reverse();    // ✓ Correct with mut prefix
+  mutArray.fill(0);      // ✓ Correct with mut prefix
   
-  // Asignaciones a propiedades:
-  mutObj.property = 'value'; // ✓ Correcto con prefijo mut
+  // Property assignments:
+  mutObj.property = 'value'; // ✓ Correct with mut prefix
   
-  // Operadores de incremento/decremento:
-  mutObj.counter++; // ✓ Correcto con prefijo mut
-  ++mutObj.counter; // ✓ Correcto con prefijo mut
+  // Increment/decrement operators:
+  mutObj.counter++; // ✓ Correct with mut prefix
+  ++mutObj.counter; // ✓ Correct with mut prefix
 }

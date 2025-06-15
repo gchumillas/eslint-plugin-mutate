@@ -10,7 +10,7 @@ const ruleTester = new RuleTester({
 
 ruleTester.run('require-mut-prefix edge cases', rule, {
   valid: [
-    // ✅ Métodos que NO mutan (deberían ser ignorados)
+    // ✅ Methods that DO NOT mutate (should be ignored)
     {
       code: `
         function processArray(array) {
@@ -45,7 +45,7 @@ ruleTester.run('require-mut-prefix edge cases', rule, {
       options: []
     },
 
-    // ✅ Propiedades anidadas con mut prefix
+    // ✅ Nested properties with mut prefix
     {
       code: `
         function updateNested(mutObj) {
@@ -75,7 +75,7 @@ ruleTester.run('require-mut-prefix edge cases', rule, {
       options: []
     },
 
-    // ✅ Funciones con contextos complejos
+    // ✅ Functions with complex contexts
     {
       code: `
         function outerFunction(data) {
@@ -92,7 +92,7 @@ ruleTester.run('require-mut-prefix edge cases', rule, {
       options: []
     },
 
-    // ✅ Callbacks y funciones de orden superior
+    // ✅ Callbacks and higher-order functions
     {
       code: `
         function processItems(items, callback) {
@@ -102,7 +102,7 @@ ruleTester.run('require-mut-prefix edge cases', rule, {
       options: []
     },
 
-    // ✅ Asíncrono con mut prefix
+    // ✅ Async with mut prefix
     {
       code: `
         async function updateAsync(mutData) {
@@ -112,7 +112,7 @@ ruleTester.run('require-mut-prefix edge cases', rule, {
       options: []
     },
 
-    // ✅ Generadores con mut prefix
+    // ✅ Generators with mut prefix
     {
       code: `
         function* processGenerator(mutState) {
@@ -125,7 +125,7 @@ ruleTester.run('require-mut-prefix edge cases', rule, {
   ],
 
   invalid: [
-    // ❌ Parámetros con nombres similares a 'mut' pero incorrectos
+    // ❌ Parameters with names similar to 'mut' but incorrect
     {
       code: `
         function updateData(mutdata) {
@@ -160,7 +160,7 @@ ruleTester.run('require-mut-prefix edge cases', rule, {
       }]
     },
 
-    // ❌ Funciones async sin mut prefix
+    // ❌ Async functions without mut prefix
     {
       code: `
         async function updateAsync(data) {
@@ -173,7 +173,7 @@ ruleTester.run('require-mut-prefix edge cases', rule, {
       }]
     },
 
-    // ❌ Generadores sin mut prefix
+    // ❌ Generators without mut prefix
     {
       code: `
         function* processGenerator(state) {
@@ -187,7 +187,7 @@ ruleTester.run('require-mut-prefix edge cases', rule, {
       }]
     },
 
-    // ❌ Métodos de clase sin mut prefix
+    // ❌ Class methods without mut prefix
     {
       code: `
         class DataProcessor {
@@ -219,7 +219,7 @@ ruleTester.run('require-mut-prefix edge cases', rule, {
       }]
     },
 
-    // ❌ Funciones con condicionales
+    // ❌ Functions with conditionals
     {
       code: `
         function conditionalUpdate(data, condition) {
@@ -236,7 +236,7 @@ ruleTester.run('require-mut-prefix edge cases', rule, {
       }]
     },
 
-    // ❌ Funciones con loops
+    // ❌ Functions with loops
     {
       code: `
         function processInLoop(obj, items) {
@@ -251,7 +251,7 @@ ruleTester.run('require-mut-prefix edge cases', rule, {
       }]
     },
 
-    // ❌ Asignación usando computed properties
+    // ❌ Assignment using computed properties
     {
       code: `
         function updateDynamic(obj, key, value) {
@@ -264,7 +264,7 @@ ruleTester.run('require-mut-prefix edge cases', rule, {
       }]
     },
 
-    // ❌ Múltiples niveles de anidación
+    // ❌ Multiple levels of nesting
     {
       code: `
         function deepUpdate(data) {

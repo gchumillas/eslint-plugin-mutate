@@ -3,9 +3,9 @@
 const { spawn } = require('child_process');
 const path = require('path');
 
-console.log('🚀 Ejecutando tests para eslint-plugin-mutate...\n');
+console.log('🚀 Running tests for eslint-plugin-mutate...\n');
 
-// Ejecutar todos los tests
+// Run all tests
 const testProcess = spawn('npx', ['mocha', 'tests/**/*.test.js', '--reporter', 'spec'], {
   stdio: 'inherit',
   cwd: process.cwd()
@@ -13,21 +13,21 @@ const testProcess = spawn('npx', ['mocha', 'tests/**/*.test.js', '--reporter', '
 
 testProcess.on('close', (code) => {
   if (code === 0) {
-    console.log('\n✅ ¡Todos los tests pasaron exitosamente!');
-    console.log('\n📋 Resumen de cobertura:');
-    console.log('   - Tests unitarios de la regla principal');
-    console.log('   - Tests de integración del plugin');
-    console.log('   - Tests de casos extremos y edge cases');
-    console.log('\n🎉 El plugin está listo para usar!');
+    console.log('\n✅ All tests passed successfully!');
+    console.log('\n📋 Coverage summary:');
+    console.log('   - Unit tests for main rule');
+    console.log('   - Plugin integration tests');
+    console.log('   - Edge cases and complex scenarios');
+    console.log('\n🎉 The plugin is ready to use!');
   } else {
-    console.log(`\n❌ Los tests fallaron con código: ${code}`);
+    console.log(`\n❌ Tests failed with code: ${code}`);
     process.exit(code);
   }
 });
 
 testProcess.on('error', (error) => {
-  console.error('❌ Error ejecutando tests:', error.message);
-  console.log('\n💡 Asegúrate de haber instalado las dependencias:');
+  console.error('❌ Error running tests:', error.message);
+  console.log('\n💡 Make sure you have installed dependencies:');
   console.log('   npm install');
   process.exit(1);
 });

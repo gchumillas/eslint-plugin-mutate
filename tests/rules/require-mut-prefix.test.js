@@ -10,7 +10,7 @@ const ruleTester = new RuleTester({
 
 ruleTester.run('require-mut-prefix', rule, {
   valid: [
-    // ✅ Parámetros con prefijo mut que son mutados correctamente
+    // ✅ Parameters with mut prefix that are correctly mutated
     {
       code: `
         function doSomething(mutUser) {
@@ -58,7 +58,7 @@ ruleTester.run('require-mut-prefix', rule, {
       options: []
     },
 
-    // ✅ Parámetros sin mutación (no necesitan prefijo mut)
+    // ✅ Parameters without mutation (don't need mut prefix)
     {
       code: `
         function readUser(user) {
@@ -85,7 +85,7 @@ ruleTester.run('require-mut-prefix', rule, {
       options: []
     },
 
-    // ✅ Crear nuevos objetos (no muta el original)
+    // ✅ Creating new objects (doesn't mutate the original)
     {
       code: `
         function updateUser(user, newData) {
@@ -103,7 +103,7 @@ ruleTester.run('require-mut-prefix', rule, {
       options: []
     },
 
-    // ✅ Mutación de variables locales (no parámetros)
+    // ✅ Mutation of local variables (not parameters)
     {
       code: `
         function processItems(items) {
@@ -116,7 +116,7 @@ ruleTester.run('require-mut-prefix', rule, {
       options: []
     },
 
-    // ✅ Funciones sin parámetros
+    // ✅ Functions without parameters
     {
       code: `
         function doSomething() {
@@ -127,7 +127,7 @@ ruleTester.run('require-mut-prefix', rule, {
       options: []
     },
 
-    // ✅ Métodos de objetos
+    // ✅ Object methods
     {
       code: `
         const handler = {
@@ -141,7 +141,7 @@ ruleTester.run('require-mut-prefix', rule, {
   ],
 
   invalid: [
-    // ❌ Asignación a propiedades sin prefijo mut
+    // ❌ Property assignment without mut prefix
     {
       code: `
         function doSomething(user) {
@@ -154,7 +154,7 @@ ruleTester.run('require-mut-prefix', rule, {
       }]
     },
 
-    // ❌ Múltiples mutaciones del mismo parámetro
+    // ❌ Multiple mutations of the same parameter
     {
       code: `
         function updateUser(user, data) {
@@ -169,7 +169,7 @@ ruleTester.run('require-mut-prefix', rule, {
       }]
     },
 
-    // ❌ Operadores de incremento/decremento
+    // ❌ Increment/decrement operators
     {
       code: `
         function incrementCounter(counter) {
@@ -193,7 +193,7 @@ ruleTester.run('require-mut-prefix', rule, {
       }]
     },
 
-    // ❌ Métodos de array que mutan - push
+    // ❌ Array methods that mutate - push
     {
       code: `
         function addItem(list, item) {
@@ -219,7 +219,7 @@ ruleTester.run('require-mut-prefix', rule, {
       }]
     },
 
-    // ❌ Métodos de array que mutan - splice
+    // ❌ Array methods that mutate - splice
     {
       code: `
         function removeItems(items, start, count) {
@@ -232,7 +232,7 @@ ruleTester.run('require-mut-prefix', rule, {
       }]
     },
 
-    // ❌ Métodos de array que mutan - sort
+    // ❌ Array methods that mutate - sort
     {
       code: `
         function sortArray(data) {
@@ -245,7 +245,7 @@ ruleTester.run('require-mut-prefix', rule, {
       }]
     },
 
-    // ❌ Función flecha
+    // ❌ Arrow function
     {
       code: `
         const updateObject = (obj) => {
@@ -258,7 +258,7 @@ ruleTester.run('require-mut-prefix', rule, {
       }]
     },
 
-    // ❌ Múltiples parámetros, uno mutado
+    // ❌ Multiple parameters, one mutated
     {
       code: `
         function processData(config, data, options) {
@@ -272,7 +272,7 @@ ruleTester.run('require-mut-prefix', rule, {
       }]
     },
 
-    // ❌ Múltiples parámetros mutados
+    // ❌ Multiple mutated parameters
     {
       code: `
         function updateBoth(user, settings) {
@@ -292,7 +292,7 @@ ruleTester.run('require-mut-prefix', rule, {
       ]
     },
 
-    // ❌ Función anidada con mutación
+    // ❌ Nested function with mutation
     {
       code: `
         function outerFunction(data) {
@@ -308,7 +308,7 @@ ruleTester.run('require-mut-prefix', rule, {
       }]
     },
 
-    // ❌ Diferentes tipos de mutación en la misma función
+    // ❌ Different types of mutation in the same function
     {
       code: `
         function complexMutation(obj, arr) {

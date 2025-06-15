@@ -1,23 +1,23 @@
 # eslint-plugin-mutate
 
-Plugin de ESLint para fomentar la conciencia sobre mutaciones de parámetros en JavaScript, requiriendo el uso del prefijo `mut` para parámetros que son mutados dentro de funciones.
+ESLint plugin to enforce mutation awareness in JavaScript by requiring the `mut` prefix for parameters that are mutated within functions.
 
-## ¿Por qué usar este plugin?
+## Why use this plugin?
 
-- **Claridad en el código**: Hace explícito cuándo una función puede mutar sus parámetros
-- **Prevención de errores**: Ayuda a identificar mutaciones no intencionadas
-- **Mejor mantenibilidad**: Los desarrolladores entienden inmediatamente el comportamiento de la función
-- **Programación funcional**: Fomenta el uso de patrones inmutables
+- **Code clarity**: Makes it explicit when a function may mutate its parameters
+- **Error prevention**: Helps identify unintended mutations
+- **Better maintainability**: Developers immediately understand the function's behavior
+- **Functional programming**: Encourages the use of immutable patterns
 
-## Instalación
+## Installation
 
 ```bash
 npm install --save-dev eslint-plugin-mutate
 ```
 
-## Configuración
+## Configuration
 
-### Configuración básica (.eslintrc.js)
+### Basic configuration (.eslintrc.js)
 
 ```javascript
 module.exports = {
@@ -28,7 +28,7 @@ module.exports = {
 };
 ```
 
-### Configuración recomendada
+### Recommended configuration
 
 ```javascript
 module.exports = {
@@ -36,13 +36,13 @@ module.exports = {
 };
 ```
 
-## Reglas
+## Rules
 
 ### `mutate/require-mut-prefix`
 
-Requiere que los parámetros que son mutados dentro de una función tengan el prefijo `mut` y empiecen con mayúscula después del prefijo.
+Requires parameters that are mutated within a function to have the `mut` prefix and start with uppercase after the prefix.
 
-#### ❌ Ejemplos incorrectos
+#### ❌ Incorrect examples
 
 ```javascript
 function doSomething(user) {
@@ -58,43 +58,43 @@ function updateCounter(counter) {
 }
 ```
 
-#### ✅ Ejemplos correctos
+#### ✅ Correct examples
 
 ```javascript
 function doSomething(mutUser) {
-  mutUser.registered = true; // ✓ Correcto
+  mutUser.registered = true; // ✓ Correct
 }
 
 function addItem(mutList, item) {
-  mutList.push(item); // ✓ Correcto
+  mutList.push(item); // ✓ Correct
 }
 
 function updateCounter(mutCounter) {
-  mutCounter.value++; // ✓ Correcto
+  mutCounter.value++; // ✓ Correct
 }
 
-// Los parámetros que no se mutan no necesitan el prefijo
+// Parameters that are not mutated don't need the prefix
 function readUserData(user) {
-  return user.name; // ✓ Correcto
+  return user.name; // ✓ Correct
 }
 
-// Crear nuevos objetos es correcto (no muta el original)
+// Creating new objects is correct (doesn't mutate the original)
 function updateUser(user, newData) {
-  return { ...user, ...newData }; // ✓ Correcto
+  return { ...user, ...newData }; // ✓ Correct
 }
 ```
 
-## Mutaciones detectadas
+## Detected mutations
 
-El plugin detecta las siguientes operaciones como mutaciones:
+The plugin detects the following operations as mutations:
 
-### Asignaciones a propiedades
+### Property assignments
 ```javascript
 obj.property = value;
 obj['property'] = value;
 ```
 
-### Operadores de incremento/decremento
+### Increment/decrement operators
 ```javascript
 obj.counter++;
 ++obj.counter;
@@ -102,7 +102,7 @@ obj.counter--;
 --obj.counter;
 ```
 
-### Métodos de array que mutan
+### Array methods that mutate
 ```javascript
 array.push();
 array.pop();
@@ -114,37 +114,39 @@ array.reverse();
 array.fill();
 ```
 
-## Uso en VSCode
+## Usage in VSCode
 
-1. Instala la extensión de ESLint en VSCode
-2. Configura tu proyecto con este plugin
-3. VSCode mostrará automáticamente los errores de mutación
-4. Los errores aparecerán subrayados en rojo con la explicación correspondiente
+1. Install the ESLint extension in VSCode
+2. Configure your project with this plugin
+3. VSCode will automatically show mutation errors
+4. Errors will appear underlined in red with the corresponding explanation
 
-## Convención de nombres
+## Naming convention
 
-- El prefijo debe ser exactamente `mut`
-- La primera letra después de `mut` debe ser mayúscula
-- Ejemplos válidos: `mutUser`, `mutList`, `mutCounter`, `mutData`
-- Ejemplos inválidos: `mutuser`, `mut_user`, `Mutuser`
+- The prefix must be exactly `mut`
+- The first letter after `mut` must be uppercase
+- Valid examples: `mutUser`, `mutList`, `mutCounter`, `mutData`
+- Invalid examples: `mutuser`, `mut_user`, `Mutuser`
 
-## Integración con otros plugins
+## Integration with other plugins
 
-Este plugin funciona bien junto con:
-- `eslint-plugin-functional` - Para programación funcional más estricta
-- `eslint-plugin-immutable` - Para inmutabilidad más completa
-- `eslint-plugin-pure` - Para funciones puras
+## Integration with other plugins
 
-## Contribuir
+This plugin works well together with:
+- `eslint-plugin-functional` - For stricter functional programming
+- `eslint-plugin-immutable` - For more complete immutability
+- `eslint-plugin-pure` - For pure functions
 
-Las contribuciones son bienvenidas. Por favor:
+## Contributing
 
-1. Fork el repositorio
-2. Crea una rama para tu feature
-3. Añade tests para nuevas funcionalidades
-4. Asegúrate de que todos los tests pasen
-5. Envía un pull request
+Contributions are welcome. Please:
 
-## Licencia
+1. Fork the repository
+2. Create a branch for your feature
+3. Add tests for new functionality
+4. Make sure all tests pass
+5. Submit a pull request
+
+## License
 
 MIT
