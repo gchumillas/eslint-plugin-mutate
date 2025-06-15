@@ -10,7 +10,7 @@
     "immutable",
     "javascript"
   ],
-  "author": "Tu Nombre",
+  "author": "Gonzalo Chumillas",
   "license": "MIT",
   "peerDependencies": {
     "eslint": ">=7.0.0"
