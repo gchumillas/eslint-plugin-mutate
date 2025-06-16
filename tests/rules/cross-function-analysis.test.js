@@ -79,6 +79,33 @@ ruleTester.run('require-mut-prefix cross-function analysis', rule, {
         }
       `,
       options: []
+    },
+    // ✅ Arrow functions with correct mut prefix
+    {
+      code: `
+        const updateUser = (mutUser) => {
+          mutUser.lastLogin = new Date();
+        };
+        
+        const processData = () => {
+          const mutUserData = { name: 'John' };
+          updateUser(mutUserData);
+        };
+      `,
+      options: []
+    },
+    {
+      code: `
+        const addItem = (mutList, item) => {
+          mutList.push(item);
+        };
+        
+        const main = () => {
+          const mutItems = [];
+          addItem(mutItems, 'new item');
+        };
+      `,
+      options: []
     }
   ],
 
@@ -187,6 +214,97 @@ ruleTester.run('require-mut-prefix cross-function analysis', rule, {
       errors: [
         {
           message: "Argument 'config' is passed to function 'processData' which mutates this parameter. Consider renaming to 'mutConfig'.",
+          type: 'Identifier'
+        }
+      ]
+    },
+    // ❌ Arrow functions without mut prefix
+    {
+      code: `
+        const updateUser = (mutUser) => {
+          mutUser.lastLogin = new Date();
+        };
+        
+        const processData = () => {
+          const userData = { name: 'John' };
+          updateUser(userData);
+        };
+      `,
+      errors: [
+        {
+          message: "Argument 'userData' is passed to function 'updateUser' which mutates this parameter. Consider renaming to 'mutUserData'.",
+          type: 'Identifier'
+        }
+      ]
+    },
+    {
+      code: `
+        const addItems = (mutList, item) => {
+          mutList.push(item);
+        };
+        
+        const main = () => {
+          const items = [];
+          addItems(items, 'new item');
+        };
+      `,
+      errors: [
+        {
+          message: "Argument 'items' is passed to function 'addItems' which mutates this parameter. Consider renaming to 'mutItems'.",
+          type: 'Identifier'
+        }
+      ]
+    },
+    {
+      code: `
+        const modifyBoth = (mutArray, mutOptions) => {
+          mutArray.sort();
+          mutOptions.sorted = true;
+        };
+        
+        const process = () => {
+          const data = [3, 1, 2];
+          const options = { sorted: false };
+          modifyBoth(data, options);
+        };
+      `,
+      errors: [
+        {
+          message: "Argument 'data' is passed to function 'modifyBoth' which mutates this parameter. Consider renaming to 'mutData'.",
+          type: 'Identifier'
+        },
+        {
+          message: "Argument 'options' is passed to function 'modifyBoth' which mutates this parameter. Consider renaming to 'mutOptions'.",
+          type: 'Identifier'
+        }
+      ]
+    },
+    // ❌ Mixed: regular function and arrow function
+    {
+      code: `
+        function updateUser(mutUser) {
+          mutUser.status = 'active';
+        }
+        
+        const processArray = (mutArray) => {
+          mutArray.push('item');
+        };
+        
+        const main = () => {
+          const userData = { name: 'John' };
+          const items = [];
+          
+          updateUser(userData);
+          processArray(items);
+        };
+      `,
+      errors: [
+        {
+          message: "Argument 'userData' is passed to function 'updateUser' which mutates this parameter. Consider renaming to 'mutUserData'.",
+          type: 'Identifier'
+        },
+        {
+          message: "Argument 'items' is passed to function 'processArray' which mutates this parameter. Consider renaming to 'mutItems'.",
           type: 'Identifier'
         }
       ]

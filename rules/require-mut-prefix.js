@@ -199,39 +199,44 @@ module.exports = {
           }
         });
         
+        // Update cross-function analysis data with actual mutations
+        if (scope.mutatedParams.size > 0) {
+          let functionName = null;
+          
+          if (node.type === 'FunctionDeclaration' && node.id) {
+            functionName = node.id.name;
+          } else if (node.type === 'FunctionExpression' && node.id) {
+            functionName = node.id.name;
+          } else if (node.type === 'ArrowFunctionExpression') {
+            // For arrow functions, check if they are assigned to a variable
+            let parent = node.parent;
+            
+            if (parent && parent.type === 'VariableDeclarator' && 
+                parent.id && parent.id.type === 'Identifier') {
+              functionName = parent.id.name;
+            }
+          }
+          
+          if (functionName) {
+            const mutatingParamIndices = [];
+            node.params.forEach((param, index) => {
+              if (param.type === 'Identifier' && scope.mutatedParams.has(param.name)) {
+                mutatingParamIndices.push(index);
+              }
+            });
+            
+            if (mutatingParamIndices.length > 0) {
+              functionsWithMutatingParams.set(functionName, mutatingParamIndices);
+            }
+          }
+        }
+        
         // Clean up the scope
         functionScopes.delete(node);
       },
       
       // Analyze cross-function mutations at the end of the program
       'Program:exit'() {
-        // Build the map of functions with mutating parameters
-        for (const functionNode of allFunctions) {
-          const scope = functionScopes.get(functionNode);
-          if (scope && scope.mutatedParams.size > 0) {
-            let functionName = null;
-            
-            if (functionNode.type === 'FunctionDeclaration' && functionNode.id) {
-              functionName = functionNode.id.name;
-            } else if (functionNode.type === 'FunctionExpression' && functionNode.id) {
-              functionName = functionNode.id.name;
-            }
-            
-            if (functionName) {
-              const mutatingParamIndices = [];
-              functionNode.params.forEach((param, index) => {
-                if (param.type === 'Identifier' && scope.mutatedParams.has(param.name)) {
-                  mutatingParamIndices.push(index);
-                }
-              });
-              
-              if (mutatingParamIndices.length > 0) {
-                functionsWithMutatingParams.set(functionName, mutatingParamIndices);
-              }
-            }
-          }
-        }
-        
         // Now check all function calls
         for (const call of functionCalls) {
           if (functionsWithMutatingParams.has(call.functionName)) {

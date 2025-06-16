@@ -86,11 +86,12 @@ function updateUser(user, newData) {
 
 ## Cross-Function Analysis
 
-The plugin also performs cross-function analysis to detect when variables are passed to functions that mutate their parameters.
+The plugin also performs cross-function analysis to detect when variables are passed to functions that mutate their parameters. This works with both regular functions and arrow functions.
 
 #### ❌ Incorrect examples
 
 ```javascript
+// Regular functions
 function updateUser(mutUser) {
   mutUser.lastLogin = new Date();
 }
@@ -100,19 +101,30 @@ function processData() {
   updateUser(userData); // Error: userData should have 'mut' prefix
 }
 
-function addToList(mutList, item) {
-  mutList.push(item);
-}
+// Arrow functions
+const updateUser = (mutUser) => {
+  mutUser.lastLogin = new Date();
+};
 
-function main() {
+const processData = () => {
+  const userData = { name: 'John' }; // Error: should be 'mutUserData'
+  updateUser(userData); // Error: userData should have 'mut' prefix
+};
+
+const addToList = (mutList, item) => {
+  mutList.push(item);
+};
+
+const main = () => {
   const items = []; // Error: should be 'mutItems'
   addToList(items, 'new item'); // Error: items should have 'mut' prefix
-}
+};
 ```
 
 #### ✅ Correct examples
 
 ```javascript
+// Regular functions
 function updateUser(mutUser) {
   mutUser.lastLogin = new Date();
 }
@@ -122,24 +134,35 @@ function processData() {
   updateUser(mutUserData); // ✓ Correct
 }
 
-function addToList(mutList, item) {
-  mutList.push(item);
-}
+// Arrow functions
+const updateUser = (mutUser) => {
+  mutUser.lastLogin = new Date();
+};
 
-function main() {
+const processData = () => {
+  const mutUserData = { name: 'John' }; // ✓ Correct
+  updateUser(mutUserData); // ✓ Correct
+};
+
+const addToList = (mutList, item) => {
+  mutList.push(item);
+};
+
+const main = () => {
   const mutItems = []; // ✓ Correct
   addToList(mutItems, 'new item'); // ✓ Correct
-}
+};
 
 // Functions that don't mutate parameters don't trigger warnings
-function readData(data) {
+const readData = (data) => {
   return data.length;
-}
+};
 
-function test() {
+const test = () => {
   const items = [1, 2, 3]; // ✓ Correct (readData doesn't mutate)
   readData(items); // ✓ Correct
-}
+};
+```
 ```
 
 ## Detected mutations
