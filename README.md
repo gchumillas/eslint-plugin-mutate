@@ -17,17 +17,6 @@ npm install --save-dev eslint-plugin-mutate
 
 ## Configuration
 
-### Basic configuration (.eslintrc.js)
-
-```javascript
-module.exports = {
-  plugins: ['mutate'],
-  rules: {
-    'mutate/require-mut-prefix': 'error'
-  }
-};
-```
-
 ### Recommended configuration
 
 ```javascript
@@ -36,15 +25,108 @@ module.exports = {
 };
 ```
 
+This enables both the parameter prefix rule and variable prefix rule with default settings.
+
+### Manual configuration (.eslintrc.js)
+
+```javascript
+module.exports = {
+  plugins: ['mutate'],
+  rules: {
+    'mutate/require-mut-param-prefix': 'error',  // Check parameters within functions
+    'mutate/require-mut-var-prefix': 'error'     // Check variables passed to functions
+  }
+};
+```
+
 ## Rules
 
-### `mutate/require-mut-prefix`
+### `mutate/require-mut-param-prefix`
 
 Requires parameters that are mutated within a function to have the `mut` prefix and start with uppercase after the prefix.
 
-#### ❌ Incorrect examples
+**What it detects:**
+- Property assignments on parameters (`param.property = value`)
+- Increment/decrement operations (`param.counter++`)
+- Mutating array/object methods (`param.push()`, `param.sort()`, etc.)
+- Deep property mutations (`param.nested.deep.property = value`)
+
+### `mutate/require-mut-var-prefix` 
+
+Requires variables passed to functions that mutate their parameters to have the `mut` prefix.
+
+**What it detects:**
+- Variables passed as arguments to functions that have `mut`-prefixed parameters
+- Cross-function analysis to track mutation chains
+- Both regular functions and arrow functions
+- Variables that will be mutated indirectly through function calls
+
+## Rule Types Explained
+
+### Parameter Rule (`require-mut-param-prefix`)
+
+This rule focuses on **function definitions** and checks if parameters that get mutated inside the function have the proper `mut` prefix.
 
 ```javascript
+// ❌ Parameter 'user' is mutated but lacks 'mut' prefix
+function updateUser(user) {
+  user.name = 'Updated'; // Mutation detected here
+}
+
+// ✅ Parameter has correct 'mut' prefix
+function updateUser(mutUser) {
+  mutUser.name = 'Updated'; // Correct
+}
+```
+
+### Variable Rule (`require-mut-var-prefix`)
+
+This rule focuses on **function calls** and checks if variables passed to functions that mutate their parameters have the proper `mut` prefix.
+
+```javascript
+// First, define a function that mutates its parameter
+function updateUser(mutUser) {
+  mutUser.name = 'Updated';
+}
+
+// ❌ Variable 'user' will be mutated but lacks 'mut' prefix
+const user = { name: 'John' };
+updateUser(user); // Error: 'user' should be 'mutUser'
+
+// ✅ Variable has correct 'mut' prefix
+const mutUser = { name: 'John' };
+updateUser(mutUser); // Correct
+```
+
+### Granular Control
+
+You can enable rules individually based on your project needs:
+
+```javascript
+module.exports = {
+  plugins: ['mutate'],
+  rules: {
+    // Only check function parameters (for library authors)
+    'mutate/require-mut-param-prefix': 'error',
+    'mutate/require-mut-var-prefix': 'off',
+    
+    // Only check variable usage (for library consumers)
+    'mutate/require-mut-param-prefix': 'off',
+    'mutate/require-mut-var-prefix': 'error',
+    
+    // Check both (recommended for most projects)
+    'mutate/require-mut-param-prefix': 'error',
+    'mutate/require-mut-var-prefix': 'error'
+  }
+};
+```
+
+#### ❌ Incorrect examples
+
+**Parameter Rule Violations (`require-mut-param-prefix`):**
+
+```javascript
+// ❌ Parameter without mut prefix
 function doSomething(user) {
   user.registered = true; // Error: Parameter 'user' is mutated but doesn't have 'mut' prefix
 }
@@ -58,7 +140,29 @@ function updateCounter(counter) {
 }
 ```
 
+**Variable Rule Violations (`require-mut-var-prefix`):**
+
+```javascript
+// First define functions that mutate parameters
+function updateUser(mutUser) {
+  mutUser.name = 'Updated';
+}
+
+function addToList(mutList, item) {
+  mutList.push(item);
+}
+
+// ❌ Variables without mut prefix passed to mutating functions
+const userData = { name: 'John' }; // Error: should be 'mutUserData'
+updateUser(userData); // Error: userData should have 'mut' prefix
+
+const items = []; // Error: should be 'mutItems'
+addToList(items, 'new item'); // Error: items should have 'mut' prefix
+```
+
 #### ✅ Correct examples
+
+**Parameter Rule Compliance:**
 
 ```javascript
 function doSomething(mutUser) {
@@ -82,6 +186,35 @@ function readUserData(user) {
 function updateUser(user, newData) {
   return { ...user, ...newData }; // ✓ Correct
 }
+```
+
+**Variable Rule Compliance:**
+
+```javascript
+// Functions that mutate parameters
+function updateUser(mutUser) {
+  mutUser.name = 'Updated';
+}
+
+function addToList(mutList, item) {
+  mutList.push(item);
+}
+
+// ✓ Variables with correct mut prefix
+const mutUserData = { name: 'John' }; // ✓ Correct
+updateUser(mutUserData); // ✓ Correct
+
+const mutItems = []; // ✓ Correct
+addToList(mutItems, 'new item'); // ✓ Correct
+
+// Functions that don't mutate parameters don't require mut prefix
+function readData(data) {
+  return data.length;
+}
+
+const normalData = [1, 2, 3]; // ✓ Correct (readData doesn't mutate)
+readData(normalData); // ✓ Correct
+```
 ```
 
 ## Cross-Function Analysis

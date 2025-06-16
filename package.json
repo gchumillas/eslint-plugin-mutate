@@ -22,7 +22,8 @@
   "scripts": {
     "test": "mocha tests/**/*.test.js",
     "test:watch": "mocha tests/**/*.test.js --watch",
-    "test:rule": "mocha tests/rules/require-mut-prefix.test.js",
+    "test:param": "mocha tests/rules/require-mut-param-prefix.test.js",
+    "test:var": "mocha tests/rules/require-mut-var-prefix.test.js",
     "test:plugin": "mocha tests/plugin.test.js",
     "test:edge": "mocha tests/rules/edge-cases.test.js",
     "test:single": "mocha"

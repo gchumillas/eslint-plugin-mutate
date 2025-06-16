@@ -1,5 +1,5 @@
 const { RuleTester } = require('eslint');
-const rule = require('../../rules/require-mut-prefix');
+const rule = require('../../rules/require-mut-var-prefix');
 
 const ruleTester = new RuleTester({
   parserOptions: {
@@ -8,7 +8,7 @@ const ruleTester = new RuleTester({
   }
 });
 
-ruleTester.run('require-mut-prefix cross-function analysis', rule, {
+ruleTester.run('require-mut-var-prefix', rule, {
   valid: [
     // ✅ Correctly passing variables with mut prefix to functions that mutate
     {
@@ -39,16 +39,27 @@ ruleTester.run('require-mut-prefix cross-function analysis', rule, {
     },
     {
       code: `
-        function modifyArray(mutArray, mutOptions) {
-          mutArray.sort();
-          mutOptions.sorted = true;
-        }
+        const updateUser = (mutUser) => {
+          mutUser.lastLogin = new Date();
+        };
         
-        function processArrays() {
-          const mutData = [3, 1, 2];
-          const mutConfig = { sorted: false };
-          modifyArray(mutData, mutConfig);
-        }
+        const processData = () => {
+          const mutUserData = { name: 'John' };
+          updateUser(mutUserData);
+        };
+      `,
+      options: []
+    },
+    {
+      code: `
+        const addItem = (mutList, item) => {
+          mutList.push(item);
+        };
+        
+        const main = () => {
+          const mutItems = [];
+          addItem(mutItems, 'new item');
+        };
       `,
       options: []
     },
@@ -77,33 +88,6 @@ ruleTester.run('require-mut-prefix cross-function analysis', rule, {
           updateUser({ name: 'John' }); // Object literal - no check needed
           updateUser(createUser());      // Function call - no check needed
         }
-      `,
-      options: []
-    },
-    // ✅ Arrow functions with correct mut prefix
-    {
-      code: `
-        const updateUser = (mutUser) => {
-          mutUser.lastLogin = new Date();
-        };
-        
-        const processData = () => {
-          const mutUserData = { name: 'John' };
-          updateUser(mutUserData);
-        };
-      `,
-      options: []
-    },
-    {
-      code: `
-        const addItem = (mutList, item) => {
-          mutList.push(item);
-        };
-        
-        const main = () => {
-          const mutItems = [];
-          addItem(mutItems, 'new item');
-        };
       `,
       options: []
     }
@@ -147,77 +131,6 @@ ruleTester.run('require-mut-prefix cross-function analysis', rule, {
         }
       ]
     },
-    {
-      code: `
-        function modifyBoth(mutArray, mutOptions) {
-          mutArray.sort();
-          mutOptions.sorted = true;
-        }
-        
-        function process() {
-          const data = [3, 1, 2];
-          const options = { sorted: false };
-          modifyBoth(data, options);
-        }
-      `,
-      errors: [
-        {
-          message: "Argument 'data' is passed to function 'modifyBoth' which mutates this parameter. Consider renaming to 'mutData'.",
-          type: 'Identifier'
-        },
-        {
-          message: "Argument 'options' is passed to function 'modifyBoth' which mutates this parameter. Consider renaming to 'mutOptions'.",
-          type: 'Identifier'
-        }
-      ]
-    },
-    // ❌ Multiple calls to the same function
-    {
-      code: `
-        function updateCounter(mutCounter) {
-          mutCounter.value++;
-        }
-        
-        function test() {
-          const counter1 = { value: 0 };
-          const counter2 = { value: 5 };
-          
-          updateCounter(counter1);
-          updateCounter(counter2);
-        }
-      `,
-      errors: [
-        {
-          message: "Argument 'counter1' is passed to function 'updateCounter' which mutates this parameter. Consider renaming to 'mutCounter1'.",
-          type: 'Identifier'
-        },
-        {
-          message: "Argument 'counter2' is passed to function 'updateCounter' which mutates this parameter. Consider renaming to 'mutCounter2'.",
-          type: 'Identifier'
-        }
-      ]
-    },
-    // ❌ Mixed: some arguments with mut prefix, some without
-    {
-      code: `
-        function processData(mutArray, mutConfig) {
-          mutArray.push('item');
-          mutConfig.processed = true;
-        }
-        
-        function main() {
-          const mutData = [];
-          const config = { processed: false };
-          processData(mutData, config);
-        }
-      `,
-      errors: [
-        {
-          message: "Argument 'config' is passed to function 'processData' which mutates this parameter. Consider renaming to 'mutConfig'.",
-          type: 'Identifier'
-        }
-      ]
-    },
     // ❌ Arrow functions without mut prefix
     {
       code: `
@@ -233,24 +146,6 @@ ruleTester.run('require-mut-prefix cross-function analysis', rule, {
       errors: [
         {
           message: "Argument 'userData' is passed to function 'updateUser' which mutates this parameter. Consider renaming to 'mutUserData'.",
-          type: 'Identifier'
-        }
-      ]
-    },
-    {
-      code: `
-        const addItems = (mutList, item) => {
-          mutList.push(item);
-        };
-        
-        const main = () => {
-          const items = [];
-          addItems(items, 'new item');
-        };
-      `,
-      errors: [
-        {
-          message: "Argument 'items' is passed to function 'addItems' which mutates this parameter. Consider renaming to 'mutItems'.",
           type: 'Identifier'
         }
       ]

@@ -2,7 +2,7 @@ module.exports = {
   meta: {
     type: 'problem',
     docs: {
-      description: 'Require "mut" prefix for parameters that are mutated within functions',
+      description: 'Require "mut" prefix for variables passed to functions that mutate their parameters',
       category: 'Best Practices',
       recommended: true
     },
@@ -11,14 +11,14 @@ module.exports = {
   },
 
   create(context) {
-    // Store information about parameters and their mutations per function
-    const functionScopes = new Map();
     // Store functions that have mutating parameters (for cross-function analysis)
     const functionsWithMutatingParams = new Map();
     // Store all function calls to check later
     const functionCalls = [];
     // Store all function declarations/expressions for later analysis
     const allFunctions = [];
+    // Store information about parameters and their mutations per function
+    const functionScopes = new Map();
     
     function isMutatingOperation(node) {
       return node.type === 'AssignmentExpression' ||
@@ -160,44 +160,10 @@ module.exports = {
         }
       },
       
-      // When exiting a function, check if there are mutated parameters without prefix
+      // When exiting a function, update cross-function analysis data
       'FunctionDeclaration, FunctionExpression, ArrowFunctionExpression:exit'(node) {
         const scope = functionScopes.get(node);
         if (!scope) return;
-        
-        // Update cross-function analysis data with actual mutations
-        if (scope.mutatedParams.size > 0) {
-          let functionName = null;
-          
-          if (node.type === 'FunctionDeclaration' && node.id) {
-            functionName = node.id.name;
-          } else if (node.type === 'FunctionExpression' && node.id) {
-            functionName = node.id.name;
-          }
-          
-          if (functionName) {
-            const mutatingParamIndices = [];
-            node.params.forEach((param, index) => {
-              if (param.type === 'Identifier' && scope.mutatedParams.has(param.name)) {
-                mutatingParamIndices.push(index);
-              }
-            });
-            
-            if (mutatingParamIndices.length > 0) {
-              functionsWithMutatingParams.set(functionName, mutatingParamIndices);
-            }
-          }
-        }
-        
-        scope.mutatedParams.forEach(paramName => {
-          const paramInfo = scope.params.get(paramName);
-          if (!paramInfo.hasMutPrefix) {
-            context.report({
-              node: paramInfo.node,
-              message: `Parameter '${paramName}' is mutated but doesn't have 'mut' prefix. Consider renaming to 'mut${paramName.charAt(0).toUpperCase()}${paramName.slice(1)}'.`
-            });
-          }
-        });
         
         // Update cross-function analysis data with actual mutations
         if (scope.mutatedParams.size > 0) {

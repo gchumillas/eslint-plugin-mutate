@@ -1,5 +1,5 @@
 const { RuleTester } = require('eslint');
-const rule = require('../../rules/require-mut-prefix');
+const paramRule = require('../../rules/require-mut-param-prefix');
 
 const ruleTester = new RuleTester({
   parserOptions: {
@@ -8,7 +8,7 @@ const ruleTester = new RuleTester({
   }
 });
 
-ruleTester.run('require-mut-prefix edge cases', rule, {
+ruleTester.run('require-mut-param-prefix edge cases', paramRule, {
   valid: [
     // ✅ Methods that DO NOT mutate (should be ignored)
     {
