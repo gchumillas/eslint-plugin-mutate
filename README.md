@@ -84,6 +84,64 @@ function updateUser(user, newData) {
 }
 ```
 
+## Cross-Function Analysis
+
+The plugin also performs cross-function analysis to detect when variables are passed to functions that mutate their parameters.
+
+#### ❌ Incorrect examples
+
+```javascript
+function updateUser(mutUser) {
+  mutUser.lastLogin = new Date();
+}
+
+function processData() {
+  const userData = { name: 'John' }; // Error: should be 'mutUserData'
+  updateUser(userData); // Error: userData should have 'mut' prefix
+}
+
+function addToList(mutList, item) {
+  mutList.push(item);
+}
+
+function main() {
+  const items = []; // Error: should be 'mutItems'
+  addToList(items, 'new item'); // Error: items should have 'mut' prefix
+}
+```
+
+#### ✅ Correct examples
+
+```javascript
+function updateUser(mutUser) {
+  mutUser.lastLogin = new Date();
+}
+
+function processData() {
+  const mutUserData = { name: 'John' }; // ✓ Correct
+  updateUser(mutUserData); // ✓ Correct
+}
+
+function addToList(mutList, item) {
+  mutList.push(item);
+}
+
+function main() {
+  const mutItems = []; // ✓ Correct
+  addToList(mutItems, 'new item'); // ✓ Correct
+}
+
+// Functions that don't mutate parameters don't trigger warnings
+function readData(data) {
+  return data.length;
+}
+
+function test() {
+  const items = [1, 2, 3]; // ✓ Correct (readData doesn't mutate)
+  readData(items); // ✓ Correct
+}
+```
+
 ## Detected mutations
 
 The plugin detects the following operations as mutations:

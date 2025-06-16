@@ -13,6 +13,12 @@ module.exports = {
   create(context) {
     // Store information about parameters and their mutations per function
     const functionScopes = new Map();
+    // Store functions that have mutating parameters (for cross-function analysis)
+    const functionsWithMutatingParams = new Map();
+    // Store all function calls to check later
+    const functionCalls = [];
+    // Store all function declarations/expressions for later analysis
+    const allFunctions = [];
     
     function isMutatingOperation(node) {
       return node.type === 'AssignmentExpression' ||
@@ -60,6 +66,29 @@ module.exports = {
              /^mut[A-Z]/.test(paramName);
     }
     
+    function checkCrossFunctionMutation(node) {
+      // Store function calls for later analysis
+      if (node.type === 'CallExpression') {
+        let functionName = null;
+        
+        // Handle different types of function calls
+        if (node.callee.type === 'Identifier') {
+          functionName = node.callee.name;
+        } else if (node.callee.type === 'MemberExpression' && 
+                   node.callee.property.type === 'Identifier') {
+          functionName = node.callee.property.name;
+        }
+        
+        if (functionName) {
+          functionCalls.push({
+            node,
+            functionName,
+            arguments: node.arguments
+          });
+        }
+      }
+    }
+    
     return {
       // Detect when entering a function
       'FunctionDeclaration, FunctionExpression, ArrowFunctionExpression'(node) {
@@ -67,7 +96,7 @@ module.exports = {
         const mutatedParams = new Set();
         
         // Collect parameters
-        node.params.forEach(param => {
+        node.params.forEach((param, index) => {
           if (param.type === 'Identifier') {
             params.set(param.name, {
               node: param,
@@ -77,10 +106,16 @@ module.exports = {
         });
         
         functionScopes.set(node, { params, mutatedParams });
+        
+        // Store function for later analysis
+        allFunctions.push(node);
       },
       
-      // Detect mutations
+      // Detect mutations and function calls
       'AssignmentExpression, UpdateExpression, CallExpression'(node) {
+        // Store function calls for later analysis
+        checkCrossFunctionMutation(node);
+        
         // Find all containing functions (to handle nested functions)
         const containingFunctions = [];
         let parent = node.parent;
@@ -130,6 +165,30 @@ module.exports = {
         const scope = functionScopes.get(node);
         if (!scope) return;
         
+        // Update cross-function analysis data with actual mutations
+        if (scope.mutatedParams.size > 0) {
+          let functionName = null;
+          
+          if (node.type === 'FunctionDeclaration' && node.id) {
+            functionName = node.id.name;
+          } else if (node.type === 'FunctionExpression' && node.id) {
+            functionName = node.id.name;
+          }
+          
+          if (functionName) {
+            const mutatingParamIndices = [];
+            node.params.forEach((param, index) => {
+              if (param.type === 'Identifier' && scope.mutatedParams.has(param.name)) {
+                mutatingParamIndices.push(index);
+              }
+            });
+            
+            if (mutatingParamIndices.length > 0) {
+              functionsWithMutatingParams.set(functionName, mutatingParamIndices);
+            }
+          }
+        }
+        
         scope.mutatedParams.forEach(paramName => {
           const paramInfo = scope.params.get(paramName);
           if (!paramInfo.hasMutPrefix) {
@@ -142,6 +201,60 @@ module.exports = {
         
         // Clean up the scope
         functionScopes.delete(node);
+      },
+      
+      // Analyze cross-function mutations at the end of the program
+      'Program:exit'() {
+        // Build the map of functions with mutating parameters
+        for (const functionNode of allFunctions) {
+          const scope = functionScopes.get(functionNode);
+          if (scope && scope.mutatedParams.size > 0) {
+            let functionName = null;
+            
+            if (functionNode.type === 'FunctionDeclaration' && functionNode.id) {
+              functionName = functionNode.id.name;
+            } else if (functionNode.type === 'FunctionExpression' && functionNode.id) {
+              functionName = functionNode.id.name;
+            }
+            
+            if (functionName) {
+              const mutatingParamIndices = [];
+              functionNode.params.forEach((param, index) => {
+                if (param.type === 'Identifier' && scope.mutatedParams.has(param.name)) {
+                  mutatingParamIndices.push(index);
+                }
+              });
+              
+              if (mutatingParamIndices.length > 0) {
+                functionsWithMutatingParams.set(functionName, mutatingParamIndices);
+              }
+            }
+          }
+        }
+        
+        // Now check all function calls
+        for (const call of functionCalls) {
+          if (functionsWithMutatingParams.has(call.functionName)) {
+            const mutParamIndices = functionsWithMutatingParams.get(call.functionName);
+            
+            // Check each argument at positions where the function expects mut parameters
+            mutParamIndices.forEach(paramIndex => {
+              if (paramIndex < call.arguments.length) {
+                const argument = call.arguments[paramIndex];
+                
+                // Check if argument is a simple identifier
+                if (argument.type === 'Identifier') {
+                  if (!hasMutPrefix(argument.name)) {
+                    context.report({
+                      node: argument,
+                      message: `Argument '${argument.name}' is passed to function '${call.functionName}' which mutates this parameter. Consider renaming to 'mut${argument.name.charAt(0).toUpperCase()}${argument.name.slice(1)}'.`
+                    });
+                  }
+                }
+              }
+            });
+          }
+        }
       }
     };
   }
