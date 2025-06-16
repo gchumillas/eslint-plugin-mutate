@@ -8,10 +8,21 @@
     "plugin",
     "mutation",
     "immutable",
-    "javascript"
+    "javascript",
+    "functional-programming",
+    "side-effects",
+    "linting"
   ],
   "author": "Gonzalo Chumillas",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gchumillas/eslint-plugin-mutate.git"
+  },
+  "bugs": {
+    "url": "https://github.com/gchumillas/eslint-plugin-mutate/issues"
+  },
+  "homepage": "https://github.com/gchumillas/eslint-plugin-mutate#readme",
   "peerDependencies": {
     "eslint": ">=7.0.0"
   },
