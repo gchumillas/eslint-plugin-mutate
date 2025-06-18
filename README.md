@@ -2,6 +2,8 @@
 
 ESLint plugin to enforce mutation awareness in JavaScript by requiring the `mut` prefix for parameters that are mutated within functions. The goal is to make code more explicit about side effects and encourage immutable programming patterns.
 
+<img width="591" alt="Image" src="https://github.com/user-attachments/assets/882a825a-5bfa-465f-8c70-d158685fb616" />
+
 ## Why use this plugin?
 
 - **Code clarity**: Makes it explicit when a function may mutate its parameters
