@@ -2,7 +2,28 @@
 
 ESLint plugin to enforce mutation awareness in JavaScript by requiring the `mut` prefix for parameters that are mutated within functions. The goal is to make code more explicit about side effects and encourage immutable programming patterns.
 
-<img width="591" alt="Image" src="https://github.com/user-attachments/assets/882a825a-5bfa-465f-8c70-d158685fb616" />
+## Example
+```js
+// eslint rules example:
+//
+// 'mutate/require-mut-param-prefix': 'error',
+// 'mutate/require-mut-var-prefix': 'warn',
+
+// [Error] Parameter 'arr' is mutated but doesn't have 'mut' prefix.
+// Consider renaming to 'mutArr'.eslint(mutate/require-mut-param-prefix)
+function sortArr(arr, byFieldName) {
+  arr.sort((a, b) => {
+    if (a[byFieldName] < b[byFieldName]) return -1;
+    if (a[byFieldName] > b[byFieldName]) return 1;
+    return 0;
+  });
+}
+
+// [Warning] Argument 'arr' is passed to function 'sortArr' which mutates this parameter.
+// Consider renaming to 'mutArr'.eslint(mutate/require-mut-var-prefix)
+sortArr(arr, 'name');
+console.log(arr);
+```
 
 ## Why use this plugin?
 
@@ -11,13 +32,11 @@ ESLint plugin to enforce mutation awareness in JavaScript by requiring the `mut`
 - **Better maintainability**: Developers immediately understand the function's behavior
 - **Functional programming**: Encourages the use of immutable patterns
 
-## Installation
+## Installation and usage in VSCode
 
 ```bash
 npm install --save-dev eslint-plugin-mutate
 ```
-
-## Usage in VSCode
 
 1. Install the ESLint extension in VSCode
 2. Configure your project with this plugin
