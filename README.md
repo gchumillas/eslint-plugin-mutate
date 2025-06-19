@@ -2,31 +2,39 @@
 
 ESLint plugin to enforce mutation awareness in JavaScript by requiring the `mut` prefix for parameters that are mutated within functions. The goal is to make code more explicit about side effects and encourage immutable programming patterns.
 
-## Example
-```js
-// eslint rules example:
-//
-// 'mutate/require-mut-param-prefix': 'error',
-// 'mutate/require-mut-var-prefix': 'warn',
-
-// [Error] Parameter 'arr' is mutated but doesn't have 'mut' prefix.
-// Consider renaming to 'mutArr'.eslint(mutate/require-mut-param-prefix)
-function sortArr(arr, byFieldName) {
-  arr.sort((a, b) => {
-    if (a[byFieldName] < b[byFieldName]) return -1;
-    if (a[byFieldName] > b[byFieldName]) return 1;
-    return 0;
-  });
-}
-
-// [Warning] Argument 'arr' is passed to function 'sortArr' which mutates this parameter.
-// Consider renaming to 'mutArr'.eslint(mutate/require-mut-var-prefix)
-sortArr(arr, 'name');
-console.log(arr);
-```
-
 ## Why use this plugin?
 
+If you're an experienced developer, you probably know that modifying function parameters is not recommended, as they are modified "in origin" and can cause hard-to-detect side effects (bugs).
+
+The following is a real-world example. The `doSomething` function inadvertently modifies the `items` parameter, causing unintended side effects:
+
+```js
+function doSomething(items) {
+   const item = items.shift()
+   console.log(item) // prints 1
+}
+
+const items = [1, 2, 3];
+doSomething(items)
+console.log(items) // prints [2, 3] !!!
+```
+
+Ideally, we should avoid mutating input parameters, but when mutation is necessary, this plugin helps prevent bugs by requiring the `mut` prefix to make mutations explicit:
+
+```js
+// ⚠️ `mutItems` is mutated in origin
+function doSomething(mutItems) {
+   const mutItems = items.shift()
+   console.log(mutItems) // prints 1
+}
+
+// ⚠️ `mutItems` can be mutated
+const mutItems = [1, 2, 3];
+doSomething(mutItems)
+console.log(mutItems) // prints [2, 3] !!!
+```
+
+**In summary:**
 - **Code clarity**: Makes it explicit when a function may mutate its parameters
 - **Error prevention**: Helps identify unintended mutations
 - **Better maintainability**: Developers immediately understand the function's behavior
