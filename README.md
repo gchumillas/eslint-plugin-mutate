@@ -21,7 +21,7 @@ doSomething(items)
 console.log(items) // prints [2, 3] !!!
 ```
 
-Ideally, we should avoid mutating input parameters, but when mutation is necessary, this plugin helps prevent bugs by requiring the `mut` prefix to make mutations explicit:
+This plugin solves this problem by enforcing a naming convention that makes mutations explicit:
 
 ```js
 // ⚠️ `mutItems` is mutated in origin
@@ -35,6 +35,8 @@ const mutItems = [1, 2, 3];
 doSomething(mutItems)
 console.log(mutItems) // prints [2, 3] !!!
 ```
+
+Now it's impossible to accidentally mutate `mutItems` - the name itself warns you!
 
 **In summary:**
 - **Code clarity**: Makes it explicit when a function may mutate its parameters
