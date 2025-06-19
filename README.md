@@ -10,8 +10,10 @@ The following is a real-world example. The `doSomething` function inadvertently 
 
 ```js
 function doSomething(items) {
-   const item = items.shift()
-   console.log(item) // prints 1
+   // we just wanted to get the first item
+   // but we forgot that `shift()` mutates `items`
+   const firstItem = items.shift()
+   console.log(firstItem) // prints 1
 }
 
 const items = [1, 2, 3];
@@ -24,8 +26,8 @@ Ideally, we should avoid mutating input parameters, but when mutation is necessa
 ```js
 // ⚠️ `mutItems` is mutated in origin
 function doSomething(mutItems) {
-   const mutItems = items.shift()
-   console.log(mutItems) // prints 1
+   const firstItem = mutItems.shift()
+   console.log(firstItem) // prints 1
 }
 
 // ⚠️ `mutItems` can be mutated
