@@ -1,3 +1,6 @@
+// Examples for testing JavaScript support in eslint-plugin-mutate
+// Run with: npx eslint examples/javascript-examples.js
+
 // ❌ BAD - Parameter is mutated but doesn't have 'mut' prefix
 function doSomething(user) {
   user.registered = true; // ESLint will report error here
