@@ -36,8 +36,9 @@ function deepMutation(user: Mut<{profile: {name: string}}>) {
 // ✅ VALID - Parameters without Mut<T> type that are NOT mutated (read-only)
 function readOnly(items: number[]) {
   // OK - only reading, no mutation
-  console.log(items.length);
-  console.log(items[0]);
+  const length = items.length;
+  const firstItem = items[0];
+  // Using the values without returning them makes semantic sense
 }
 
 function calculateSum(numbers: number[]) {
@@ -46,15 +47,21 @@ function calculateSum(numbers: number[]) {
 }
 
 function logUser(user: {name: string}) {
-  // OK - only reading
-  console.log(user.name);
+  // OK - only reading user data for logging/validation
+  const userName = user.name;
+  const isValidName = userName.length > 0;
+  // In real code this might log to a service or validate
 }
 
 // ✅ VALID - Mixed parameters - only mutable ones need Mut<T>
 function processData(readOnlyData: string[], mutResults: Mut<number[]>) {
   // OK - reading from readOnlyData, mutating mutResults
-  console.log(readOnlyData.length);
-  mutResults.push(42);
+  const dataLength = readOnlyData.length;
+  const hasData = dataLength > 0;
+  
+  if (hasData) {
+    mutResults.push(42);
+  }
 }
 
 // ❌ INVALID - Parameters mutated without Mut<T> type
@@ -103,8 +110,8 @@ function outer(data: any[]) {
 // Examples of usage
 const items = [1, 2, 3] as Mut<number[]>;
 doSomething(items);
-console.log(items); // [1, 2, 3, 4]
+// items is now [1, 2, 3, 4]
 
 const user = {name: 'Alice', age: 30} as Mut<{name: string; age: number}>;
 processUser(user);
-console.log(user); // {name: 'John', age: 31}
+// user is now {name: 'John', age: 31}
