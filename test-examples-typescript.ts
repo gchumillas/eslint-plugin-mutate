@@ -1,8 +1,8 @@
 // Examples for testing TypeScript support in eslint-plugin-mutate
 // Run with: npx eslint test-examples-typescript.ts
 
-// No import needed! The Mut<T> type is available globally
-// when eslint-plugin-mutate is installed
+// Import the Mut<T> type explicitly for this file
+import type { Mut } from './index';
 
 // ✅ VALID - Parameters with Mut<T> type that are correctly mutated
 function doSomething(items: Mut<number[]>) {
