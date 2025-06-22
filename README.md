@@ -38,13 +38,23 @@ function doSomething(items: Mut<number[]>) {
 }
 ```
 
-The `Mut<T>` type is a simple utility type that preserves the original type while marking it as mutable:
+The `Mut<T>` type is available in **two ways** for maximum flexibility:
+
+#### Option 1: Global Declaration (Recommended)
+Add `"types": ["eslint-plugin-mutate"]` to your `tsconfig.json`:
+
+```jsonc
+{
+  "compilerOptions": {
+    "types": ["eslint-plugin-mutate"]
+  }
+}
+```
+
+Then use `Mut<T>` anywhere without imports:
 
 ```ts
-// The Mut<T> type is provided by this plugin
-export type Mut<T extends object> = T;
-
-// Usage examples
+// No import needed!
 function processUser(user: Mut<{name: string; age: number}>) {
   user.name = 'John';  // OK - user is marked as mutable
   user.age++;          // OK - user is marked as mutable
@@ -54,11 +64,24 @@ function processArray(items: Mut<string[]>) {
   items.push('new');   // OK - items is marked as mutable
   items.sort();        // OK - items is marked as mutable
 }
-
-// Variables can also use the Mut<T> type
-const mutItems = [1, 2, 3] as Mut<number[]>;
-processArray(mutItems);
 ```
+
+#### Option 2: Explicit Import
+If you prefer explicit imports or can't modify `tsconfig.json`:
+
+```ts
+import type { Mut } from 'eslint-plugin-mutate';
+
+function processUser(user: Mut<{name: string}>) {
+  user.name = 'Updated'; // OK - user is marked as mutable
+}
+
+function updateArray(items: Mut<number[]>) {
+  items.push(42); // OK - items is marked as mutable
+}
+```
+
+Both approaches work identically - choose what fits your project best!
 
 ## Why use this plugin?
 
@@ -112,9 +135,10 @@ npm install --save-dev @typescript-eslint/parser
 ```
 
 1. Install the ESLint extension in VSCode
-2. Configure your project with this plugin
+2. Configure your project with this plugin  
 3. VSCode will automatically show mutation errors
 4. Errors will appear underlined in red with the corresponding explanation
+5. **TypeScript users**: The `Mut<T>` type is automatically available globally - no import needed!
 
 ## Configuration
 
