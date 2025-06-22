@@ -2,7 +2,7 @@ module.exports = {
   meta: {
     type: 'problem',
     docs: {
-      description: 'Require "mut" prefix for parameters that are mutated within functions',
+      description: 'Require "mut" prefix for parameters that are mutated within functions (JavaScript) or Mut<T> type annotation (TypeScript)',
       category: 'Best Practices',
       recommended: true
     },
@@ -11,6 +11,10 @@ module.exports = {
   },
 
   create(context) {
+    // Detect if we're in a TypeScript file
+    const filename = context.getFilename();
+    const isTypeScript = filename.endsWith('.ts') || filename.endsWith('.tsx');
+    
     // Store information about parameters and their mutations per function
     const functionScopes = new Map();
     
@@ -60,6 +64,31 @@ module.exports = {
              /^mut[A-Z]/.test(paramName);
     }
     
+    function hasMutType(param) {
+      // Check if parameter has Mut<T> type annotation
+      return param.typeAnnotation && 
+             param.typeAnnotation.typeAnnotation &&
+             param.typeAnnotation.typeAnnotation.type === 'TSTypeReference' &&
+             param.typeAnnotation.typeAnnotation.typeName &&
+             param.typeAnnotation.typeAnnotation.typeName.name === 'Mut';
+    }
+    
+    function isValidMutableParam(param) {
+      if (isTypeScript) {
+        return hasMutType(param);
+      } else {
+        return hasMutPrefix(param.name);
+      }
+    }
+    
+    function getErrorMessage(paramName) {
+      if (isTypeScript) {
+        return `Parameter '${paramName}' is mutated but doesn't have 'Mut<T>' type annotation. Consider changing type to 'Mut<YourType>'.`;
+      } else {
+        return `Parameter '${paramName}' is mutated but doesn't have 'mut' prefix. Consider renaming to 'mut${paramName.charAt(0).toUpperCase()}${paramName.slice(1)}'.`;
+      }
+    }
+    
     return {
       // Detect when entering a function
       'FunctionDeclaration, FunctionExpression, ArrowFunctionExpression'(node) {
@@ -71,7 +100,7 @@ module.exports = {
           if (param.type === 'Identifier') {
             params.set(param.name, {
               node: param,
-              hasMutPrefix: hasMutPrefix(param.name)
+              isValidMutable: isValidMutableParam(param)
             });
           }
         });
@@ -132,10 +161,10 @@ module.exports = {
         
         scope.mutatedParams.forEach(paramName => {
           const paramInfo = scope.params.get(paramName);
-          if (!paramInfo.hasMutPrefix) {
+          if (!paramInfo.isValidMutable) {
             context.report({
               node: paramInfo.node,
-              message: `Parameter '${paramName}' is mutated but doesn't have 'mut' prefix. Consider renaming to 'mut${paramName.charAt(0).toUpperCase()}${paramName.slice(1)}'.`
+              message: getErrorMessage(paramName)
             });
           }
         });

@@ -1,6 +1,64 @@
 # eslint-plugin-mutate
 
-ESLint plugin to enforce mutation awareness in JavaScript by requiring the `mut` prefix for parameters that are mutated within functions. The goal is to make code more explicit about side effects and encourage immutable programming patterns.
+ESLint plugin to enforce mutation awareness in JavaScript and TypeScript by requiring the `mut` prefix for parameters that are mutated within functions (JavaScript) or the `Mut<T>` type annotation (TypeScript). The goal is to make code more explicit about side effects and encourage immutable programming patterns.
+
+## Language Support
+
+This plugin supports both **JavaScript** and **TypeScript** with different approaches:
+
+### JavaScript - `mut` Prefix Convention
+
+In JavaScript files (`.js`, `.jsx`), the plugin enforces the `mut` prefix naming convention:
+
+```js
+// ❌ Parameter is mutated but lacks 'mut' prefix
+function doSomething(items) {
+   const firstItem = items.shift() // Error: 'items' should be 'mutItems'
+}
+
+// ✅ Parameter has 'mut' prefix indicating it will be mutated
+function doSomething(mutItems) {
+   const firstItem = mutItems.shift() // Correct
+}
+```
+
+### TypeScript - `Mut<T>` Type Annotation
+
+In TypeScript files (`.ts`, `.tsx`), the plugin enforces the `Mut<T>` type annotation:
+
+```ts
+// ❌ Parameter is mutated but lacks 'Mut<T>' type
+function doSomething(items: number[]) {
+   const firstItem = items.shift() // Error: should be 'Mut<number[]>'
+}
+
+// ✅ Parameter has 'Mut<T>' type indicating it will be mutated
+function doSomething(items: Mut<number[]>) {
+   const firstItem = items.shift() // Correct
+}
+```
+
+The `Mut<T>` type is a simple utility type that preserves the original type while marking it as mutable:
+
+```ts
+// The Mut<T> type is provided by this plugin
+export type Mut<T extends object> = T;
+
+// Usage examples
+function processUser(user: Mut<{name: string; age: number}>) {
+  user.name = 'John';  // OK - user is marked as mutable
+  user.age++;          // OK - user is marked as mutable
+}
+
+function processArray(items: Mut<string[]>) {
+  items.push('new');   // OK - items is marked as mutable
+  items.sort();        // OK - items is marked as mutable
+}
+
+// Variables can also use the Mut<T> type
+const mutItems = [1, 2, 3] as Mut<number[]>;
+processArray(mutItems);
+```
 
 ## Why use this plugin?
 
@@ -48,6 +106,9 @@ Now it's impossible to accidentally mutate `mutItems` - the name itself warns yo
 
 ```bash
 npm install --save-dev eslint-plugin-mutate
+
+# For TypeScript support, also install:
+npm install --save-dev @typescript-eslint/parser
 ```
 
 1. Install the ESLint extension in VSCode
@@ -69,6 +130,7 @@ This enables both the parameter prefix rule and variable prefix rule with defaul
 
 ### Manual configuration (.eslintrc.js)
 
+For **JavaScript** projects:
 ```javascript
 module.exports = {
   plugins: ['mutate'],
@@ -79,17 +141,74 @@ module.exports = {
 };
 ```
 
+For **TypeScript** projects:
+```javascript
+module.exports = {
+  parser: '@typescript-eslint/parser',
+  plugins: ['mutate'],
+  rules: {
+    'mutate/require-mut-param-prefix': 'error',  // Uses Mut<T> type in .ts files
+    'mutate/require-mut-var-prefix': 'error'     // Check variables passed to functions
+  }
+};
+```
+
+### Mixed JavaScript/TypeScript projects
+
+The plugin automatically detects file types and applies the appropriate rules:
+- `.js`, `.jsx` files → `mut` prefix convention
+- `.ts`, `.tsx` files → `Mut<T>` type annotation
+
+```javascript
+module.exports = {
+  parser: '@typescript-eslint/parser',
+  plugins: ['mutate'],
+  rules: {
+    'mutate/require-mut-param-prefix': 'error',
+    'mutate/require-mut-var-prefix': 'error'
+  }
+};
+```
+
 ## Rules
 
 ### `mutate/require-mut-param-prefix`
 
-Requires parameters that are mutated within a function to have the `mut` prefix and start with uppercase after the prefix.
+Requires parameters that are mutated within a function to have the appropriate mutation marker:
+- **JavaScript files**: `mut` prefix with uppercase letter after prefix (e.g., `mutUser`, `mutList`)
+- **TypeScript files**: `Mut<T>` type annotation (e.g., `user: Mut<UserType>`)
 
 **What it detects:**
 - Property assignments on parameters (`param.property = value`)
 - Increment/decrement operations (`param.counter++`)
 - Mutating array/object methods (`param.push()`, `param.sort()`, etc.)
 - Deep property mutations (`param.nested.deep.property = value`)
+
+**JavaScript examples:**
+```js
+// ❌ Missing mut prefix
+function updateUser(user) {
+  user.name = 'Updated'; // Error: Parameter 'user' should be 'mutUser'
+}
+
+// ✅ Correct mut prefix
+function updateUser(mutUser) {
+  mutUser.name = 'Updated'; // Correct
+}
+```
+
+**TypeScript examples:**
+```ts
+// ❌ Missing Mut<T> type
+function updateUser(user: {name: string}) {
+  user.name = 'Updated'; // Error: Parameter should have 'Mut<T>' type
+}
+
+// ✅ Correct Mut<T> type
+function updateUser(user: Mut<{name: string}>) {
+  user.name = 'Updated'; // Correct
+}
+```
 
 ### `mutate/require-mut-var-prefix` 
 
@@ -165,6 +284,7 @@ module.exports = {
 
 **Parameter Rule Violations (`require-mut-param-prefix`):**
 
+*JavaScript files:*
 ```javascript
 // ❌ Parameter without mut prefix
 function doSomething(user) {
@@ -180,8 +300,25 @@ function updateCounter(counter) {
 }
 ```
 
+*TypeScript files:*
+```typescript
+// ❌ Parameter without Mut<T> type
+function doSomething(user: {registered: boolean}) {
+  user.registered = true; // Error: Parameter should have 'Mut<T>' type annotation
+}
+
+function addItem(list: number[], item: number) {
+  list.push(item); // Error: Parameter should be 'Mut<number[]>'
+}
+
+function updateCounter(counter: {value: number}) {
+  counter.value++; // Error: Parameter should have 'Mut<T>' type annotation
+}
+```
+
 **Variable Rule Violations (`require-mut-var-prefix`):**
 
+*JavaScript files:*
 ```javascript
 // First define functions that mutate parameters
 function updateUser(mutUser) {
@@ -200,10 +337,30 @@ const items = []; // Error: should be 'mutItems'
 addToList(items, 'new item'); // Error: items should have 'mut' prefix
 ```
 
+*TypeScript files:*
+```typescript
+// First define functions that mutate parameters
+function updateUser(user: Mut<{name: string}>) {
+  user.name = 'Updated';
+}
+
+function addToList(list: Mut<string[]>, item: string) {
+  list.push(item);
+}
+
+// ❌ Variables without mut prefix (TypeScript still uses mut prefix for variables)
+const userData = { name: 'John' }; // Error: should be 'mutUserData'
+updateUser(userData); // Error: userData should have 'mut' prefix
+
+const items: string[] = []; // Error: should be 'mutItems'
+addToList(items, 'new item'); // Error: items should have 'mut' prefix
+```
+
 #### ✅ Correct examples
 
 **Parameter Rule Compliance:**
 
+*JavaScript files:*
 ```javascript
 function doSomething(mutUser) {
   mutUser.registered = true; // ✓ Correct
@@ -228,23 +385,49 @@ function updateUser(user, newData) {
 }
 ```
 
+*TypeScript files:*
+```typescript
+function doSomething(user: Mut<{registered: boolean}>) {
+  user.registered = true; // ✓ Correct
+}
+
+function addItem(list: Mut<number[]>, item: number) {
+  list.push(item); // ✓ Correct
+}
+
+function updateCounter(counter: Mut<{value: number}>) {
+  counter.value++; // ✓ Correct
+}
+
+// Parameters that are not mutated don't need Mut<T>
+function readUserData(user: {name: string}) {
+  return user.name; // ✓ Correct
+}
+
+// Creating new objects is correct (doesn't mutate the original)
+function updateUser(user: {name: string}, newData: Partial<typeof user>) {
+  return { ...user, ...newData }; // ✓ Correct
+}
+```
+
 **Variable Rule Compliance:**
 
+*JavaScript and TypeScript files (variables always use mut prefix):*
 ```javascript
 // Functions that mutate parameters
-function updateUser(mutUser) {
+function updateUser(mutUser) {  // JavaScript
   mutUser.name = 'Updated';
 }
 
-function addToList(mutList, item) {
-  mutList.push(item);
+function addToList(list: Mut<string[]>, item: string) {  // TypeScript
+  list.push(item);
 }
 
 // ✓ Variables with correct mut prefix
 const mutUserData = { name: 'John' }; // ✓ Correct
 updateUser(mutUserData); // ✓ Correct
 
-const mutItems = []; // ✓ Correct
+const mutItems: string[] = []; // ✓ Correct (TypeScript)
 addToList(mutItems, 'new item'); // ✓ Correct
 
 // Functions that don't mutate parameters don't require mut prefix
@@ -258,10 +441,22 @@ readData(normalData); // ✓ Correct
 
 ## Naming convention
 
+### JavaScript files
 - The prefix must be exactly `mut`
 - The first letter after `mut` must be uppercase
 - Valid examples: `mutUser`, `mutList`, `mutCounter`, `mutData`
 - Invalid examples: `mutuser`, `mut_user`, `Mutuser`
+
+### TypeScript files
+- **Parameters**: Use `Mut<T>` type annotation where `T` is the original type
+- **Variables**: Still use the `mut` prefix convention (same as JavaScript)
+- Valid parameter examples: `user: Mut<UserType>`, `items: Mut<string[]>`, `data: Mut<{count: number}>`
+- Valid variable examples: `mutUser`, `mutItems`, `mutData`
+
+The `Mut<T>` type:
+- Only works with object types (arrays, objects, etc.)
+- Scalar types (string, number, boolean) cannot be mutated in JavaScript
+- Is a simple utility type: `type Mut<T extends object> = T`
 
 ## Integration with other plugins
 

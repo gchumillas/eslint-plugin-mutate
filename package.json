@@ -1,14 +1,16 @@
 {
   "name": "eslint-plugin-mutate",
-  "version": "1.0.6",
+  "version": "1.1.0",
   "description": "ESLint plugin to enforce mutation awareness by requiring 'mut' prefix for mutable parameters",
   "main": "index.js",
+  "types": "index.d.ts",
   "keywords": [
     "eslint",
     "plugin",
     "mutation",
     "immutable",
     "javascript",
+    "typescript",
     "functional-programming",
     "side-effects",
     "linting"
@@ -27,6 +29,8 @@
     "eslint": ">=7.0.0"
   },
   "devDependencies": {
+    "@types/eslint": "^9.6.1",
+    "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8.0.0",
     "mocha": "^10.0.0"
   },
@@ -34,6 +38,7 @@
     "test": "mocha tests/**/*.test.js",
     "test:watch": "mocha tests/**/*.test.js --watch",
     "test:param": "mocha tests/rules/require-mut-param-prefix.test.js",
+    "test:param-ts": "mocha tests/rules/require-mut-param-prefix-typescript.test.js",
     "test:var": "mocha tests/rules/require-mut-var-prefix.test.js",
     "test:plugin": "mocha tests/plugin.test.js",
     "test:edge": "mocha tests/rules/edge-cases.test.js",
