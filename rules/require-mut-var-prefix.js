@@ -2,7 +2,7 @@ module.exports = {
   meta: {
     type: 'problem',
     docs: {
-      description: 'Require "mut" prefix for variables passed to functions that mutate their parameters',
+      description: 'Require "mut" prefix for variables passed to functions that mutate their parameters (JavaScript) or Mut<T> type annotation (TypeScript)',
       category: 'Best Practices',
       recommended: true
     },
@@ -11,6 +11,9 @@ module.exports = {
   },
 
   create(context) {
+    // Detect if we're in a TypeScript file
+    const filename = context.getFilename();
+    const isTypeScript = filename.endsWith('.ts') || filename.endsWith('.tsx');
     // Store functions that have mutating parameters (for cross-function analysis)
     const functionsWithMutatingParams = new Map();
     // Store all function calls to check later
@@ -19,6 +22,8 @@ module.exports = {
     const allFunctions = [];
     // Store information about parameters and their mutations per function
     const functionScopes = new Map();
+    // Store variables that have Mut<T> type annotation (for TypeScript)
+    const mutTypeVariables = new Set();
     
     function isMutatingOperation(node) {
       return node.type === 'AssignmentExpression' ||
@@ -66,6 +71,60 @@ module.exports = {
              /^mut[A-Z]/.test(paramName);
     }
     
+    function hasMutType(variable) {
+      // For variables, we need to find the variable declaration and check its type annotation
+      // This is more complex because we need to look up the variable declaration
+      return false; // TODO: Implement this properly
+    }
+    
+    function getVariableDeclaration(variableName, scope) {
+      // Find the variable declaration for a given variable name
+      let currentScope = scope;
+      while (currentScope) {
+        const variable = currentScope.variables.find(v => v.name === variableName);
+        if (variable && variable.defs.length > 0) {
+          return variable.defs[0].node;
+        }
+        currentScope = currentScope.upper;
+      }
+      return null;
+    }
+    
+    function hasValidMutableMarker(argument, scope) {
+      if (isTypeScript) {
+        // In TypeScript, check if the variable has Mut<T> type annotation or mut prefix
+        return mutTypeVariables.has(argument.name) || hasMutPrefix(argument.name);
+      } else {
+        // In JavaScript, require mut prefix
+        return hasMutPrefix(argument.name);
+      }
+    }
+    
+    function hasMutTypeAnnotation(node) {
+      // Check if a variable declaration has Mut<T> type annotation
+      if (!node.id || !node.id.typeAnnotation) return false;
+      
+      const typeAnnotation = node.id.typeAnnotation.typeAnnotation;
+      
+      // Check for TypeReference with type name 'Mut'
+      if (typeAnnotation.type === 'TSTypeReference' && 
+          typeAnnotation.typeName && 
+          typeAnnotation.typeName.type === 'Identifier' &&
+          typeAnnotation.typeName.name === 'Mut') {
+        return true;
+      }
+      
+      return false;
+    }
+    
+    function getErrorMessage(variableName) {
+      if (isTypeScript) {
+        return `Argument '${variableName}' is passed to function which mutates this parameter. Consider using 'Mut<T>' type annotation or renaming to 'mut${variableName.charAt(0).toUpperCase()}${variableName.slice(1)}'.`;
+      } else {
+        return `Argument '${variableName}' is passed to function which mutates this parameter. Consider renaming to 'mut${variableName.charAt(0).toUpperCase()}${variableName.slice(1)}'.`;
+      }
+    }
+    
     function checkCrossFunctionMutation(node) {
       // Store function calls for later analysis
       if (node.type === 'CallExpression') {
@@ -90,6 +149,16 @@ module.exports = {
     }
     
     return {
+      // Detect variable declarations with Mut<T> type annotation
+      'VariableDeclarator'(node) {
+        if (isTypeScript && hasMutTypeAnnotation(node)) {
+          // Add variable to set of variables with Mut<T> type
+          if (node.id.type === 'Identifier') {
+            mutTypeVariables.add(node.id.name);
+          }
+        }
+      },
+
       // Detect when entering a function
       'FunctionDeclaration, FunctionExpression, ArrowFunctionExpression'(node) {
         const params = new Map();
@@ -203,6 +272,8 @@ module.exports = {
       
       // Analyze cross-function mutations at the end of the program
       'Program:exit'() {
+        const sourceCode = context.getSourceCode();
+        
         // Now check all function calls
         for (const call of functionCalls) {
           if (functionsWithMutatingParams.has(call.functionName)) {
@@ -215,10 +286,11 @@ module.exports = {
                 
                 // Check if argument is a simple identifier
                 if (argument.type === 'Identifier') {
-                  if (!hasMutPrefix(argument.name)) {
+                  const scope = sourceCode.getScope ? sourceCode.getScope(argument) : context.getScope();
+                  if (!hasValidMutableMarker(argument, scope)) {
                     context.report({
                       node: argument,
-                      message: `Argument '${argument.name}' is passed to function '${call.functionName}' which mutates this parameter. Consider renaming to 'mut${argument.name.charAt(0).toUpperCase()}${argument.name.slice(1)}'.`
+                      message: getErrorMessage(argument.name)
                     });
                   }
                 }
