@@ -11,9 +11,9 @@
     "types": []
   },
   "include": [
+    "index.d.ts",
     "*.ts",
-    "**/*.ts",
-    "index.d.ts"
+    "**/*.ts"
   ],
   "exclude": [
     "node_modules",

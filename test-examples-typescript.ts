@@ -1,7 +1,7 @@
 // Examples for testing TypeScript support in eslint-plugin-mutate
 // Run with: npx eslint test-examples-typescript.ts
 
-// Import the Mut<T> type explicitly for this file
+// Import the Mut<T> type explicitly for this example file
 import type { Mut } from './index';
 
 // ✅ VALID - Parameters with Mut<T> type that are correctly mutated
