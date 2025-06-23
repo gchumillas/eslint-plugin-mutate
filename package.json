@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-mutate",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "ESLint plugin to enforce mutation awareness in JavaScript and TypeScript using 'mut' prefix or Mut<T> type",
   "main": "index.js",
   "types": "index.d.ts",
