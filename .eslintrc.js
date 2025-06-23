@@ -2,8 +2,8 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   plugins: ['mutate'],
   rules: {
-    'mutate/require-mut-param-prefix': 'error',
-    'mutate/require-mut-var-prefix': 'error'
+    'mutate/require-mut-param': 'error',
+    'mutate/require-mut-var': 'error'
   },
   parserOptions: {
     ecmaVersion: 2020,

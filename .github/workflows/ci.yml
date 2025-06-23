@@ -38,7 +38,7 @@ jobs:
         npm init -y
         npm install ../eslint-plugin-mutate-*.tgz
         npm install eslint
-        echo "module.exports = { plugins: ['mutate'], rules: { 'mutate/require-mut-prefix': 'error' } };" > .eslintrc.js
+        echo "module.exports = { plugins: ['mutate'], rules: { 'mutate/require-mut-param': 'error' } };" > .eslintrc.js
         echo "function test(user) { user.name = 'test'; }" > test.js
         npx eslint test.js && exit 1 || echo "✅ Plugin correctly detected mutation error"
         cd ..

@@ -8,14 +8,14 @@ describe('eslint-plugin-mutate', () => {
       assert(typeof plugin.rules === 'object');
     });
 
-    it('should export require-mut-param-prefix rule', () => {
-      assert(plugin.rules['require-mut-param-prefix']);
-      assert(typeof plugin.rules['require-mut-param-prefix'] === 'object');
+    it('should export require-mut-param rule', () => {
+      assert(plugin.rules['require-mut-param']);
+      assert(typeof plugin.rules['require-mut-param'] === 'object');
     });
 
-    it('should export require-mut-var-prefix rule', () => {
-      assert(plugin.rules['require-mut-var-prefix']);
-      assert(typeof plugin.rules['require-mut-var-prefix'] === 'object');
+    it('should export require-mut-var rule', () => {
+      assert(plugin.rules['require-mut-var']);
+      assert(typeof plugin.rules['require-mut-var'] === 'object');
     });
 
     it('should export configs object', () => {
@@ -35,14 +35,14 @@ describe('eslint-plugin-mutate', () => {
       assert(recommended.plugins.includes('mutate'));
       
       assert(recommended.rules);
-      assert(recommended.rules['mutate/require-mut-param-prefix'] === 'error');
-      assert(recommended.rules['mutate/require-mut-var-prefix'] === 'error');
+      assert(recommended.rules['mutate/require-mut-param'] === 'error');
+      assert(recommended.rules['mutate/require-mut-var'] === 'error');
     });
   });
 
   describe('rule metadata', () => {
-    const paramRule = plugin.rules['require-mut-param-prefix'];
-    const varRule = plugin.rules['require-mut-var-prefix'];
+    const paramRule = plugin.rules['require-mut-param'];
+    const varRule = plugin.rules['require-mut-var'];
 
     it('should have correct param rule metadata', () => {
       assert(paramRule.meta);
