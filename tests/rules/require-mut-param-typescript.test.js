@@ -1,5 +1,5 @@
 const { RuleTester } = require('eslint');
-const rule = require('../../rules/require-mut-param-prefix');
+const rule = require('../../rules/require-mut-param');
 
 const ruleTester = new RuleTester({
   parser: require.resolve('@typescript-eslint/parser'),
@@ -9,7 +9,7 @@ const ruleTester = new RuleTester({
   },
 });
 
-ruleTester.run('require-mut-param-prefix (TypeScript)', rule, {
+ruleTester.run('require-mut-param (TypeScript)', rule, {
   valid: [
     // ✅ Parameters with Mut<T> type that are correctly mutated
     {

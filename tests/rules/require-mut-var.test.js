@@ -1,5 +1,5 @@
 const { RuleTester } = require('eslint');
-const rule = require('../../rules/require-mut-var-prefix');
+const rule = require('../../rules/require-mut-var');
 
 const ruleTester = new RuleTester({
   parserOptions: {
@@ -8,7 +8,7 @@ const ruleTester = new RuleTester({
   }
 });
 
-ruleTester.run('require-mut-var-prefix', rule, {
+ruleTester.run('require-mut-var', rule, {
   valid: [
     // ✅ Correctly passing variables with mut prefix to functions that mutate
     {

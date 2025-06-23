@@ -1,5 +1,5 @@
 const { RuleTester } = require('eslint');
-const rule = require('../../rules/require-mut-var-prefix');
+const rule = require('../../rules/require-mut-var');
 
 const ruleTester = new RuleTester({
   parser: require.resolve('@typescript-eslint/parser'),
@@ -9,7 +9,7 @@ const ruleTester = new RuleTester({
   },
 });
 
-ruleTester.run('require-mut-var-prefix (TypeScript Variables)', rule, {
+ruleTester.run('require-mut-var (TypeScript Variables)', rule, {
   valid: [
     // ✅ Variable with Mut<T> type (should pass)
     {

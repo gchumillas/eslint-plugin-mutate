@@ -159,8 +159,8 @@ For **JavaScript** projects:
 module.exports = {
   plugins: ['mutate'],
   rules: {
-    'mutate/require-mut-param-prefix': 'error',  // Check parameters within functions
-    'mutate/require-mut-var-prefix': 'error'     // Check variables passed to functions
+    'mutate/require-mut-param': 'error',  // Check parameters within functions
+    'mutate/require-mut-var': 'error'     // Check variables passed to functions
   }
 };
 ```
@@ -171,8 +171,8 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   plugins: ['mutate'],
   rules: {
-    'mutate/require-mut-param-prefix': 'error',  // Uses Mut<T> type in .ts files
-    'mutate/require-mut-var-prefix': 'error'     // Check variables passed to functions
+    'mutate/require-mut-param': 'error',  // Uses Mut<T> type in .ts files
+    'mutate/require-mut-var': 'error'     // Check variables passed to functions
   }
 };
 ```
@@ -188,15 +188,15 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   plugins: ['mutate'],
   rules: {
-    'mutate/require-mut-param-prefix': 'error',
-    'mutate/require-mut-var-prefix': 'error'
+    'mutate/require-mut-param': 'error',
+    'mutate/require-mut-var': 'error'
   }
 };
 ```
 
 ## Rules
 
-### `mutate/require-mut-param-prefix`
+### `mutate/require-mut-param`
 
 Requires parameters that are mutated within a function to have the appropriate mutation marker:
 - **JavaScript files**: `mut` prefix with uppercase letter after prefix (e.g., `mutUser`, `mutList`)
@@ -234,7 +234,7 @@ function updateUser(user: Mut<{name: string}>) {
 }
 ```
 
-### `mutate/require-mut-var-prefix` 
+### `mutate/require-mut-var` 
 
 Requires variables passed to functions that mutate their parameters to have the `mut` prefix.
 
@@ -246,7 +246,7 @@ Requires variables passed to functions that mutate their parameters to have the 
 
 ## Rule Types Explained
 
-### Parameter Rule (`require-mut-param-prefix`)
+### Parameter Rule (`require-mut-param`)
 
 This rule focuses on **function definitions** and checks if parameters that get mutated inside the function have the proper `mut` prefix.
 
@@ -262,7 +262,7 @@ function updateUser(mutUser) {
 }
 ```
 
-### Variable Rule (`require-mut-var-prefix`)
+### Variable Rule (`require-mut-var`)
 
 This rule focuses on **function calls** and checks if variables passed to functions that mutate their parameters have the proper `mut` prefix.
 
@@ -290,23 +290,23 @@ module.exports = {
   plugins: ['mutate'],
   rules: {
     // Only check function parameters (for library authors)
-    'mutate/require-mut-param-prefix': 'error',
-    'mutate/require-mut-var-prefix': 'off',
+    'mutate/require-mut-param': 'error',
+    'mutate/require-mut-var': 'off',
     
     // Only check variable usage (for library consumers)
-    'mutate/require-mut-param-prefix': 'off',
-    'mutate/require-mut-var-prefix': 'error',
+    'mutate/require-mut-param': 'off',
+    'mutate/require-mut-var': 'error',
     
     // Check both (recommended for most projects)
-    'mutate/require-mut-param-prefix': 'error',
-    'mutate/require-mut-var-prefix': 'error'
+    'mutate/require-mut-param': 'error',
+    'mutate/require-mut-var': 'error'
   }
 };
 ```
 
 #### ❌ Incorrect examples
 
-**Parameter Rule Violations (`require-mut-param-prefix`):**
+**Parameter Rule Violations (`require-mut-param`):**
 
 *JavaScript files:*
 ```javascript
@@ -340,7 +340,7 @@ function updateCounter(counter: {value: number}) {
 }
 ```
 
-**Variable Rule Violations (`require-mut-var-prefix`):**
+**Variable Rule Violations (`require-mut-var`):**
 
 *JavaScript files:*
 ```javascript

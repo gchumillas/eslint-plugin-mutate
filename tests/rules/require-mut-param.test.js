@@ -1,5 +1,5 @@
 const { RuleTester } = require('eslint');
-const rule = require('../../rules/require-mut-param-prefix');
+const rule = require('../../rules/require-mut-param');
 
 const ruleTester = new RuleTester({
   parserOptions: {
@@ -8,7 +8,7 @@ const ruleTester = new RuleTester({
   }
 });
 
-ruleTester.run('require-mut-param-prefix', rule, {
+ruleTester.run('require-mut-param', rule, {
   valid: [
     // ✅ Parameters with mut prefix that are correctly mutated
     {
