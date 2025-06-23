@@ -117,11 +117,11 @@ module.exports = {
       return false;
     }
     
-    function getErrorMessage(variableName) {
+    function getErrorMessage(variableName, functionName) {
       if (isTypeScript) {
-        return `Argument '${variableName}' is passed to function which mutates this parameter. Consider using 'Mut<T>' type annotation or renaming to 'mut${variableName.charAt(0).toUpperCase()}${variableName.slice(1)}'.`;
+        return `Argument '${variableName}' is passed to function '${functionName}' which mutates this parameter. Consider using 'Mut<T>' type annotation or renaming to 'mut${variableName.charAt(0).toUpperCase()}${variableName.slice(1)}'.`;
       } else {
-        return `Argument '${variableName}' is passed to function which mutates this parameter. Consider renaming to 'mut${variableName.charAt(0).toUpperCase()}${variableName.slice(1)}'.`;
+        return `Argument '${variableName}' is passed to function '${functionName}' which mutates this parameter. Consider renaming to 'mut${variableName.charAt(0).toUpperCase()}${variableName.slice(1)}'.`;
       }
     }
     
@@ -290,7 +290,7 @@ module.exports = {
                   if (!hasValidMutableMarker(argument, scope)) {
                     context.report({
                       node: argument,
-                      message: getErrorMessage(argument.name)
+                      message: getErrorMessage(argument.name, call.functionName)
                     });
                   }
                 }

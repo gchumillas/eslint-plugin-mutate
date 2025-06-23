@@ -65,7 +65,7 @@ ruleTester.run('require-mut-var (TypeScript Variables)', rule, {
       filename: 'test.ts',
       errors: [
         {
-          message: "Argument 'user' is passed to function which mutates this parameter. Consider using 'Mut<T>' type annotation or renaming to 'mutUser'.",
+          message: "Argument 'user' is passed to function 'updateUser' which mutates this parameter. Consider using 'Mut<T>' type annotation or renaming to 'mutUser'.",
         },
       ],
     },
