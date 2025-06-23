@@ -154,42 +154,12 @@ This enables both the parameter prefix rule and variable prefix rule with defaul
 
 ### Manual configuration (.eslintrc.js)
 
-For **JavaScript** projects:
 ```javascript
 module.exports = {
   plugins: ['mutate'],
   rules: {
     'mutate/require-mut-param': 'error',  // Check parameters within functions
     'mutate/require-mut-var': 'error'     // Check variables passed to functions
-  }
-};
-```
-
-For **TypeScript** projects:
-```javascript
-module.exports = {
-  parser: '@typescript-eslint/parser',
-  plugins: ['mutate'],
-  rules: {
-    'mutate/require-mut-param': 'error',  // Uses Mut<T> type in .ts files
-    'mutate/require-mut-var': 'error'     // Check variables passed to functions
-  }
-};
-```
-
-### Mixed JavaScript/TypeScript projects
-
-The plugin automatically detects file types and applies the appropriate rules:
-- `.js`, `.jsx` files → `mut` prefix convention
-- `.ts`, `.tsx` files → `Mut<T>` type annotation
-
-```javascript
-module.exports = {
-  parser: '@typescript-eslint/parser',
-  plugins: ['mutate'],
-  rules: {
-    'mutate/require-mut-param': 'error',
-    'mutate/require-mut-var': 'error'
   }
 };
 ```
