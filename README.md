@@ -105,13 +105,13 @@ console.log(items) // prints [2, 3] !!!
 This plugin solves this problem by enforcing explicit mutation markers that make side effects visible:
 
 ```ts
-// ⚠️ `items` is mutated in origin
+// ⚠️ `items` is mutated in origin (use `numItems` in JavaScript)
 function doSomething(items: Mut<[]number>) {
    const firstItem = items.shift()
    console.log(firstItem) // prints 1
 }
 
-// ⚠️ `items` can be mutated
+// ⚠️ `items` can be mutated (use `numItemsp` in JavaScript)
 const items: Mut<[]number> = [1, 2, 3];
 doSomething(items)
 console.log(items) // prints [2, 3] !!!
