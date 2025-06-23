@@ -37,12 +37,18 @@
   "scripts": {
     "test": "mocha tests/**/*.test.js",
     "test:watch": "mocha tests/**/*.test.js --watch",
-    "test:param": "mocha tests/rules/require-mut-param-prefix.test.js",
-    "test:param-ts": "mocha tests/rules/require-mut-param-prefix-typescript.test.js",
-    "test:var": "mocha tests/rules/require-mut-var-prefix.test.js",
+    "test:param": "mocha tests/rules/require-mut-param.test.js",
+    "test:param-ts": "mocha tests/rules/require-mut-param-typescript.test.js",
+    "test:var": "mocha tests/rules/require-mut-var.test.js",
+    "test:var-ts": "mocha tests/rules/require-mut-var-typescript.test.js",
     "test:plugin": "mocha tests/plugin.test.js",
     "test:edge": "mocha tests/rules/edge-cases.test.js",
-    "test:single": "mocha"
+    "test:single": "mocha",
+    "preversion": "npm test",
+    "prepublishOnly": "npm test",
+    "version": "npm test",
+    "prepare": "npm test",
+    "release": "npm test && npm version patch && npm publish"
   },
   "engines": {
     "node": ">=12.0.0"
