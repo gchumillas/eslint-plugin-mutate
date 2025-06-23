@@ -2,6 +2,48 @@
 
 ESLint plugin to enforce mutation awareness in JavaScript and TypeScript by requiring the `mut` prefix for parameters that are mutated within functions (JavaScript) or the `Mut<T>` type annotation (TypeScript). The goal is to make code more explicit about side effects and encourage immutable programming patterns.
 
+## Why use this plugin?
+
+If you're an experienced developer, you probably know that modifying function parameters is not recommended, as they are modified "in origin" and can cause hard-to-detect side effects (bugs).
+
+The following is a real-world example. The `doSomething` function inadvertently modifies the `items` parameter, causing unintended side effects:
+
+```ts
+function doSomething(items: []number) {
+   // we just wanted to get the first item
+   // but we forgot that `shift()` mutates `items`
+   const firstItem = items.shift()
+   console.log(firstItem) // prints 1
+}
+
+const items = [1, 2, 3];
+doSomething(items)
+console.log(items) // prints [2, 3] !!!
+```
+
+This plugin solves this problem by enforcing explicit mutation markers that make side effects visible:
+
+```ts
+// ⚠️ `items` is mutated in origin (use `numItems` in JavaScript)
+function doSomething(items: Mut<[]number>) {
+   const firstItem = items.shift()
+   console.log(firstItem) // prints 1
+}
+
+// ⚠️ `items` can be mutated (use `numItems` in JavaScript)
+const items: Mut<[]number> = [1, 2, 3];
+doSomething(items)
+console.log(items) // prints [2, 3] !!!
+```
+
+Now it's impossible to accidentally mutate `items` - the name itself warns you!
+
+**In summary:**
+- **Code clarity**: Makes it explicit when a function may mutate its parameters
+- **Error prevention**: Helps identify unintended mutations
+- **Better maintainability**: Developers immediately understand the function's behavior
+- **Functional programming**: Encourages the use of immutable patterns
+
 ## Language Support
 
 This plugin supports both **JavaScript** and **TypeScript** with different approaches:
@@ -82,48 +124,6 @@ function updateArray(items: Mut<number[]>) {
 ```
 
 Both approaches work identically - choose what fits your project best!
-
-## Why use this plugin?
-
-If you're an experienced developer, you probably know that modifying function parameters is not recommended, as they are modified "in origin" and can cause hard-to-detect side effects (bugs).
-
-The following is a real-world example. The `doSomething` function inadvertently modifies the `items` parameter, causing unintended side effects:
-
-```ts
-function doSomething(items: []number) {
-   // we just wanted to get the first item
-   // but we forgot that `shift()` mutates `items`
-   const firstItem = items.shift()
-   console.log(firstItem) // prints 1
-}
-
-const items = [1, 2, 3];
-doSomething(items)
-console.log(items) // prints [2, 3] !!!
-```
-
-This plugin solves this problem by enforcing explicit mutation markers that make side effects visible:
-
-```ts
-// ⚠️ `items` is mutated in origin (use `numItems` in JavaScript)
-function doSomething(items: Mut<[]number>) {
-   const firstItem = items.shift()
-   console.log(firstItem) // prints 1
-}
-
-// ⚠️ `items` can be mutated (use `numItemsp` in JavaScript)
-const items: Mut<[]number> = [1, 2, 3];
-doSomething(items)
-console.log(items) // prints [2, 3] !!!
-```
-
-Now it's impossible to accidentally mutate `items` - the name itself warns you!
-
-**In summary:**
-- **Code clarity**: Makes it explicit when a function may mutate its parameters
-- **Error prevention**: Helps identify unintended mutations
-- **Better maintainability**: Developers immediately understand the function's behavior
-- **Functional programming**: Encourages the use of immutable patterns
 
 ## Installation and usage in VSCode
 
