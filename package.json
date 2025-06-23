@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-mutate",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "Prevent accidental parameter mutations by enforcing explicit `mut` prefix (JavaScript) or `Mut<T>` type annotation (TypeScript)",
   "main": "index.js",
   "types": "index.d.ts",
