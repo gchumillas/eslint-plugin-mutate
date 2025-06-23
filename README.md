@@ -89,8 +89,8 @@ If you're an experienced developer, you probably know that modifying function pa
 
 The following is a real-world example. The `doSomething` function inadvertently modifies the `items` parameter, causing unintended side effects:
 
-```js
-function doSomething(items) {
+```ts
+function doSomething(items: []number) {
    // we just wanted to get the first item
    // but we forgot that `shift()` mutates `items`
    const firstItem = items.shift()
@@ -104,20 +104,20 @@ console.log(items) // prints [2, 3] !!!
 
 This plugin solves this problem by enforcing a naming convention that makes mutations explicit:
 
-```js
-// ⚠️ `mutItems` is mutated in origin
-function doSomething(mutItems) {
-   const firstItem = mutItems.shift()
+```ts
+// ⚠️ `items` is mutated in origin
+function doSomething(items: Mut<[]number>) {
+   const firstItem = items.shift()
    console.log(firstItem) // prints 1
 }
 
-// ⚠️ `mutItems` can be mutated
-const mutItems = [1, 2, 3];
-doSomething(mutItems)
-console.log(mutItems) // prints [2, 3] !!!
+// ⚠️ `items` can be mutated
+const items: Mut<[]number> = [1, 2, 3];
+doSomething(items)
+console.log(items) // prints [2, 3] !!!
 ```
 
-Now it's impossible to accidentally mutate `mutItems` - the name itself warns you!
+Now it's impossible to accidentally mutate `items` - the name itself warns you!
 
 **In summary:**
 - **Code clarity**: Makes it explicit when a function may mutate its parameters
