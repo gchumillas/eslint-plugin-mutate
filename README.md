@@ -102,7 +102,7 @@ doSomething(items)
 console.log(items) // prints [2, 3] !!!
 ```
 
-This plugin solves this problem by enforcing a naming convention that makes mutations explicit:
+This plugin solves this problem by enforcing explicit mutation markers that make side effects visible:
 
 ```ts
 // ⚠️ `items` is mutated in origin
