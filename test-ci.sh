@@ -3,6 +3,11 @@
 # Local CI Testing Script for eslint-plugin-mutate
 # This script mimics the GitHub Actions CI workflow locally
 # Fixed version with proper nvm initialization and fallback options
+# 
+# Usage:
+#   ./test-ci.sh              # Interactive mode
+#   ./test-ci.sh --quick      # Quick test with current Node version
+#   ./test-ci.sh --full       # Full CI test with all Node versions
 
 set -e  # Exit on first error
 
@@ -14,9 +19,82 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Node versions to test (matching CI matrix)
-NODE_VERSIONS=("16.17.0" "18.19.1" "20.11.1")
+NODE_VERSIONS=("16.17.0" "18.19.1" "20.11.1" "22.11.0")
 
-echo -e "${BLUE}🚀 Starting Local CI Testing for eslint-plugin-mutate${NC}"
+# Parse command line arguments
+TEST_MODE=""
+case "${1:-}" in
+    --quick|-q)
+        TEST_MODE="quick"
+        ;;
+    --full|-f)
+        TEST_MODE="full"
+        ;;
+    --help|-h)
+        echo "Usage: $0 [OPTIONS]"
+        echo ""
+        echo "Options:"
+        echo "  --quick, -q    Quick test with current Node version"
+        echo "  --full, -f     Full CI test with all Node versions (16.x, 18.x, 20.x, 22.x)"
+        echo "  --help, -h     Show this help message"
+        echo ""
+        echo "If no option is provided, interactive mode will be used."
+        exit 0
+        ;;
+    "")
+        # No arguments provided, will use interactive mode
+        ;;
+    *)
+        echo "Error: Unknown option '$1'"
+        echo "Use '$0 --help' for usage information."
+        exit 1
+        ;;
+esac
+
+echo -e "${BLUE}🚀 Local CI Testing for eslint-plugin-mutate${NC}"
+echo "=================================================================="
+
+# Interactive mode selection (only if no command line argument was provided)
+if [ -z "$TEST_MODE" ]; then
+    echo ""
+    echo -e "${YELLOW}Choose testing mode:${NC}"
+    echo -e "  ${GREEN}1${NC} - Quick test with current Node version (fast)"
+    echo -e "  ${GREEN}2${NC} - Full CI test with all supported Node versions (16.x, 18.x, 20.x, 22.x)"
+    echo ""
+    echo -n -e "${BLUE}Select option [1-2] (default: 1): ${NC}"
+
+    # Read user input with timeout
+    if read -t 10 -r CHOICE; then
+        echo ""
+    else
+        echo ""
+        echo -e "${YELLOW}⏱️  No input received, defaulting to quick test${NC}"
+        CHOICE=1
+    fi
+
+    # Validate and set choice
+    case $CHOICE in
+        2)
+            TEST_MODE="full"
+            echo -e "${BLUE}🔄 Full CI mode selected - testing all Node versions${NC}"
+            ;;
+        1|""|*)
+            TEST_MODE="quick"
+            echo -e "${BLUE}⚡ Quick mode selected - testing current Node version only${NC}"
+            ;;
+    esac
+else
+    # Command line mode
+    case $TEST_MODE in
+        "quick")
+            echo -e "${BLUE}⚡ Quick mode (command line) - testing current Node version only${NC}"
+            ;;
+        "full")
+            echo -e "${BLUE}🔄 Full CI mode (command line) - testing all Node versions${NC}"
+            ;;
+    esac
+fi
+
 echo "=================================================================="
 
 # Store current node version to restore later
@@ -341,18 +419,37 @@ EOF
     return 0
 }
 
-# Run tests for each Node version
+# Run tests based on selected mode
 FAILED_VERSIONS=()
 
-if [ "$NODE_MANAGER" = "none" ]; then
+if [ "$TEST_MODE" = "quick" ]; then
     echo ""
-    echo -e "${YELLOW}⚠️  No Node version manager detected${NC}"
+    echo -e "${BLUE}⚡ Quick testing with current Node version...${NC}"
+    
+    # Test with current Node version only
+    current_version=$(node --version 2>/dev/null | sed 's/v//' || echo "unknown")
+    if [ "$current_version" != "unknown" ]; then
+        echo -e "${BLUE}Current Node version: v${current_version}${NC}"
+        if test_node_version_simple; then
+            echo -e "${GREEN}✅ Tests passed with current Node version${NC}"
+        else
+            echo -e "${RED}❌ Tests failed with current Node version${NC}"
+            FAILED_VERSIONS+=("current-${current_version}")
+        fi
+    else
+        echo -e "${RED}❌ No Node.js installation found${NC}"
+        echo -e "${RED}Please install Node.js: https://nodejs.org/${NC}"
+        exit 1
+    fi
+elif [ "$NODE_MANAGER" = "none" ]; then
+    echo ""
+    echo -e "${YELLOW}⚠️  No Node version manager detected for full CI mode${NC}"
     echo -e "${YELLOW}To install one, choose from:${NC}"
     echo -e "${YELLOW}  • nvm: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash${NC}"
     echo -e "${YELLOW}  • fnm: curl -fsSL https://fnm.vercel.app/install | bash${NC}"
     echo -e "${YELLOW}  • n: npm install -g n${NC}"
     echo ""
-    echo -e "${BLUE}Testing with current Node version only...${NC}"
+    echo -e "${BLUE}Falling back to quick test with current Node version...${NC}"
     
     # Test with current Node version only
     current_version=$(node --version 2>/dev/null | sed 's/v//' || echo "unknown")
@@ -370,6 +467,8 @@ if [ "$NODE_MANAGER" = "none" ]; then
         exit 1
     fi
 else
+    echo ""
+    echo -e "${BLUE}🔄 Full CI testing with all Node versions...${NC}"
     for version in "${NODE_VERSIONS[@]}"; do
         if test_node_version ${version}; then
             echo -e "${GREEN}✅ Node ${version} - SUCCESS${NC}"
@@ -382,19 +481,27 @@ fi
 
 echo ""
 echo "=================================================================="
-echo -e "${BLUE}📊 CI Testing Summary${NC}"
+if [ "$TEST_MODE" = "quick" ]; then
+    echo -e "${BLUE}📊 Quick Test Summary${NC}"
+else
+    echo -e "${BLUE}📊 Full CI Testing Summary${NC}"
+fi
 echo "=================================================================="
 
 if [ ${#FAILED_VERSIONS[@]} -eq 0 ]; then
-    echo -e "${GREEN}🎉 All tests passed!${NC}"
+    if [ "$TEST_MODE" = "quick" ]; then
+        echo -e "${GREEN}🎉 Quick test passed!${NC}"
+    else
+        echo -e "${GREEN}🎉 All CI tests passed!${NC}"
+    fi
     exit_code=0
 else
     echo -e "${RED}❌ Failed versions: ${FAILED_VERSIONS[*]}${NC}"
     exit_code=1
 fi
 
-# Restore original Node version if it was set and manager is available
-if [ "${CURRENT_NODE}" != "none" ] && [ "$NODE_MANAGER" != "none" ]; then
+# Restore original Node version if it was set and manager is available (only in full mode)
+if [ "$TEST_MODE" = "full" ] && [ "${CURRENT_NODE}" != "none" ] && [ "$NODE_MANAGER" != "none" ]; then
     echo -e "${BLUE}🔄 Restoring original Node version...${NC}"
     case $NODE_MANAGER in
         "nvm")
