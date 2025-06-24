@@ -1,5 +1,6 @@
 // Examples for testing JavaScript support in eslint-plugin-mutate
 // Run with: npx eslint examples/javascript-examples.js
+/* eslint-disable no-unused-vars */
 
 // ❌ BAD - Parameter is mutated but doesn't have 'mut' prefix
 function doSomething(user) {

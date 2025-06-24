@@ -71,26 +71,7 @@ module.exports = {
              /^mut[A-Z]/.test(paramName);
     }
     
-    function hasMutType(variable) {
-      // For variables, we need to find the variable declaration and check its type annotation
-      // This is more complex because we need to look up the variable declaration
-      return false; // TODO: Implement this properly
-    }
-    
-    function getVariableDeclaration(variableName, scope) {
-      // Find the variable declaration for a given variable name
-      let currentScope = scope;
-      while (currentScope) {
-        const variable = currentScope.variables.find(v => v.name === variableName);
-        if (variable && variable.defs.length > 0) {
-          return variable.defs[0].node;
-        }
-        currentScope = currentScope.upper;
-      }
-      return null;
-    }
-    
-    function hasValidMutableMarker(argument, scope) {
+    function hasValidMutableMarker(argument) {
       if (isTypeScript) {
         // In TypeScript, check if the variable has Mut<T> type annotation or mut prefix
         return mutTypeVariables.has(argument.name) || hasMutPrefix(argument.name);
@@ -165,7 +146,7 @@ module.exports = {
         const mutatedParams = new Set();
         
         // Collect parameters
-        node.params.forEach((param, index) => {
+        node.params.forEach((param) => {
           if (param.type === 'Identifier') {
             params.set(param.name, {
               node: param,
@@ -272,8 +253,6 @@ module.exports = {
       
       // Analyze cross-function mutations at the end of the program
       'Program:exit'() {
-        const sourceCode = context.getSourceCode();
-        
         // Now check all function calls
         for (const call of functionCalls) {
           if (functionsWithMutatingParams.has(call.functionName)) {
@@ -286,8 +265,7 @@ module.exports = {
                 
                 // Check if argument is a simple identifier
                 if (argument.type === 'Identifier') {
-                  const scope = sourceCode.getScope ? sourceCode.getScope(argument) : context.getScope();
-                  if (!hasValidMutableMarker(argument, scope)) {
+                  if (!hasValidMutableMarker(argument)) {
                     context.report({
                       node: argument,
                       message: getErrorMessage(argument.name, call.functionName)

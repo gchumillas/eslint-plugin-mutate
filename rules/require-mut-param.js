@@ -96,7 +96,7 @@ module.exports = {
         const mutatedParams = new Set();
         
         // Collect parameters
-        node.params.forEach((param, index) => {
+        node.params.forEach((param) => {
           if (param.type === 'Identifier') {
             params.set(param.name, {
               node: param,
