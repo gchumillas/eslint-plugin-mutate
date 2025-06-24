@@ -1,5 +1,6 @@
-const requireMutParam = require('../rules/require-mut-param');
-const requireMutVar = require('../rules/require-mut-var');
+const createMutRule = require('../rules/require-mut');
+const requireMutParam = createMutRule('param');
+const requireMutVar = createMutRule('var');
 
 /**
  * Focused performance tests for individual rules

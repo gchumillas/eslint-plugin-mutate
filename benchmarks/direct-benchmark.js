@@ -1,8 +1,9 @@
 // Simplified benchmark that works with local plugin development
 // Bypasses ESLint plugin loading and directly tests rule performance
 
-const requireMutParam = require('../rules/require-mut-param');
-const requireMutVar = require('../rules/require-mut-var');
+const createMutRule = require('../rules/require-mut');
+const requireMutParam = createMutRule('param');
+const requireMutVar = createMutRule('var');
 const { parse } = require('@babel/parser');
 
 /**
