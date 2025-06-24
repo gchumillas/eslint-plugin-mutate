@@ -1,4 +1,3 @@
-const { RuleTester } = require('eslint');
 const requireMutParam = require('../rules/require-mut-param');
 const requireMutVar = require('../rules/require-mut-var');
 
@@ -268,7 +267,6 @@ function profileMemoryUsage() {
   
   // Simulate heavy rule usage
   const iterations = 10000;
-  const tester = new RulePerformanceTester();
   
   console.log(`  🔄 Running ${iterations} iterations...`);
   
@@ -278,9 +276,9 @@ function profileMemoryUsage() {
       getFilename: () => 'test.js'
     };
     
-    // Create rule instances
-    const paramRule = requireMutParam.create(mockContext);
-    const varRule = requireMutVar.create(mockContext);
+    // Create rule instances (simulate work)
+    requireMutParam.create(mockContext);
+    requireMutVar.create(mockContext);
     
     // Simulate some work
     if (i % 1000 === 0 && global.gc) {

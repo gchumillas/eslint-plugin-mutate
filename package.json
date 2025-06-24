@@ -53,7 +53,7 @@
     "benchmark:rules": "node benchmarks/rule-performance.js",
     "benchmark:ci": "./benchmarks/ci-check.sh",
     "benchmark:watch": "nodemon benchmarks/direct-benchmark.js",
-    "benchmark:full": "node benchmarks/benchmark.js",
+    "benchmark:full": "node benchmarks/direct-benchmark.js",
     "benchmark:clean": "./benchmarks/clean-results.sh",
     "perf": "npm run benchmark",
     "preversion": "npm test",
