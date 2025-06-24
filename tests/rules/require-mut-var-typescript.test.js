@@ -1,5 +1,6 @@
 const { RuleTester } = require('eslint');
-const rule = require('../../rules/require-mut-var');
+const createMutRule = require('../../rules/require-mut');
+const rule = createMutRule('var');
 
 const ruleTester = new RuleTester({
   parser: require.resolve('@typescript-eslint/parser'),

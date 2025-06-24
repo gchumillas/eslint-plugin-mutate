@@ -1,5 +1,6 @@
 const { RuleTester } = require('eslint');
-const paramRule = require('../../rules/require-mut-param');
+const createMutRule = require('../../rules/require-mut');
+const paramRule = createMutRule('param');
 
 const ruleTester = new RuleTester({
   parserOptions: {

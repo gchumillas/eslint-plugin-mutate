@@ -1,7 +1,9 @@
+const createMutRule = require('./rules/require-mut');
+
 module.exports = {
   rules: {
-    'require-mut-param': require('./rules/require-mut-param'),
-    'require-mut-var': require('./rules/require-mut-var')
+    'require-mut-param': createMutRule('param'),
+    'require-mut-var': createMutRule('var')
   },
   configs: {
     recommended: {
