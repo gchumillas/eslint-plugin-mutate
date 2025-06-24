@@ -51,6 +51,6 @@
     "release": "npm test && npm version patch && npm publish"
   },
   "engines": {
-    "node": ">=12.0.0"
+    "node": ">=16.0.0"
   }
 }
