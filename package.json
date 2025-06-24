@@ -33,6 +33,8 @@
     "@types/eslint": "^9.6.1",
     "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
     "mocha": "^10.0.0",
     "nodemon": "^3.0.0"
   },
@@ -58,11 +60,16 @@
     "benchmark:full": "node benchmarks/direct-benchmark.js",
     "benchmark:clean": "./benchmarks/clean-results.sh",
     "perf": "npm run benchmark",
+    "prepare": "husky",
     "preversion": "npm run lint && npm test",
     "prepublishOnly": "npm run lint && npm test",
     "version": "npm test",
-    "prepare": "npm test",
     "release": "npm test && npm version patch && npm publish"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix"
+    ]
   },
   "engines": {
     "node": ">=16.0.0"
