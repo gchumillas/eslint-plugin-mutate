@@ -44,6 +44,14 @@ Now it's impossible to accidentally mutate `items` - the name itself warns you!
 - **Better maintainability**: Developers immediately understand the function's behavior
 - **Functional programming**: Encourages the use of immutable patterns
 
+## Requirements
+
+- **Node.js**: 16.0.0 or higher
+- **ESLint**: 7.0.0 or higher
+- **TypeScript** (optional): 3.0.0 or higher for TypeScript projects
+
+> **Note**: Node.js 14 and earlier are not supported due to dependencies that require modern JavaScript features. We recommend using the latest LTS version of Node.js for the best experience.
+
 ## Language Support
 
 This plugin supports both **JavaScript** and **TypeScript** with different approaches:
