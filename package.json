@@ -37,6 +37,8 @@
     "nodemon": "^3.0.0"
   },
   "scripts": {
+    "lint": "eslint . --ext .js",
+    "lint:fix": "eslint . --ext .js --fix",
     "test": "mocha tests/**/*.test.js",
     "test:watch": "mocha tests/**/*.test.js --watch",
     "test:param": "mocha tests/rules/require-mut-param.test.js",
@@ -56,8 +58,8 @@
     "benchmark:full": "node benchmarks/direct-benchmark.js",
     "benchmark:clean": "./benchmarks/clean-results.sh",
     "perf": "npm run benchmark",
-    "preversion": "npm test",
-    "prepublishOnly": "npm test",
+    "preversion": "npm run lint && npm test",
+    "prepublishOnly": "npm run lint && npm test",
     "version": "npm test",
     "prepare": "npm test",
     "release": "npm test && npm version patch && npm publish"

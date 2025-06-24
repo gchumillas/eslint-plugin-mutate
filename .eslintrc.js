@@ -13,5 +13,14 @@ module.exports = {
     // Basic rules for plugin development
     'no-unused-vars': 'error',
     'no-console': 'warn'
-  }
+  },
+  overrides: [
+    {
+      // Allow console.log in benchmark files
+      files: ['benchmarks/**/*.js'],
+      rules: {
+        'no-console': 'off'
+      }
+    }
+  ]
 };
