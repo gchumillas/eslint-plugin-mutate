@@ -29,10 +29,12 @@
     "eslint": ">=7.0.0"
   },
   "devDependencies": {
+    "@babel/parser": "^7.23.0",
     "@types/eslint": "^9.6.1",
     "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8.0.0",
-    "mocha": "^10.0.0"
+    "mocha": "^10.0.0",
+    "nodemon": "^3.0.0"
   },
   "scripts": {
     "test": "mocha tests/**/*.test.js",
@@ -44,6 +46,16 @@
     "test:plugin": "mocha tests/plugin.test.js",
     "test:edge": "mocha tests/rules/edge-cases.test.js",
     "test:single": "mocha",
+    "benchmark": "node benchmarks/direct-benchmark.js",
+    "benchmark:memory": "node benchmarks/direct-benchmark.js --memory",
+    "benchmark:compare": "node benchmarks/compare.js compare",
+    "benchmark:regression": "node benchmarks/compare.js regression",
+    "benchmark:rules": "node benchmarks/rule-performance.js",
+    "benchmark:ci": "./benchmarks/ci-check.sh",
+    "benchmark:watch": "nodemon benchmarks/direct-benchmark.js",
+    "benchmark:full": "node benchmarks/benchmark.js",
+    "benchmark:clean": "./benchmarks/clean-results.sh",
+    "perf": "npm run benchmark",
     "preversion": "npm test",
     "prepublishOnly": "npm test",
     "version": "npm test",

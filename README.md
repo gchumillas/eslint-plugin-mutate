@@ -2,6 +2,10 @@
 
 ESLint plugin to enforce mutation awareness in JavaScript and TypeScript by requiring the `mut` prefix for parameters that are mutated within functions (JavaScript) or the `Mut<T>` type annotation (TypeScript). The goal is to make code more explicit about side effects and encourage immutable programming patterns.
 
+[![Performance](https://img.shields.io/badge/performance-benchmarked-green.svg)](./benchmarks/)
+[![npm version](https://badge.fury.io/js/eslint-plugin-mutate.svg)](https://www.npmjs.com/package/eslint-plugin-mutate)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 ## Why use this plugin?
 
 If you're an experienced developer, you probably know that modifying function parameters is not recommended, as they are modified "in origin" and can cause hard-to-detect side effects (bugs).
@@ -466,6 +470,51 @@ This plugin works well together with:
 - `eslint-plugin-functional` - For stricter functional programming
 - `eslint-plugin-immutable` - For more complete immutability
 - `eslint-plugin-pure` - For pure functions
+
+## Performance Benchmarks
+
+This plugin is designed for production use with minimal performance overhead. We maintain comprehensive benchmarks to ensure consistent performance.
+
+### Quick Performance Stats
+
+- **Tiny functions**: ~0.02ms per file
+- **Medium complexity**: ~0.06ms per file  
+- **Large files (300+ mutations)**: ~1.8ms per file
+- **Memory usage**: <0.1KB per execution
+
+### Running Benchmarks
+
+```bash
+# Quick performance test
+npm run benchmark
+
+# Include memory profiling
+npm run benchmark:memory
+
+# Watch mode for development
+npm run benchmark:watch
+
+# Compare with previous git commits
+npm run benchmark:compare
+```
+
+### Benchmark Details
+
+Our benchmark suite tests various scenarios:
+- **Tiny**: Simple single mutations
+- **Small**: Basic functions with few mutations
+- **Medium**: Multiple parameters and mutation types  
+- **Large**: Generated code with 300+ mutations
+- **Nested**: Deep function nesting scenarios
+- **Complex**: Real-world data processing patterns
+
+The `require-mut-param` rule consistently performs ~10% faster than `require-mut-var` due to simpler AST traversal requirements.
+
+For detailed benchmark results and methodology, see the [benchmarks directory](./benchmarks/).
+
+### CI Integration
+
+Performance regression detection is built into our CI pipeline with configurable thresholds. Any performance degradation >25% will fail the build to ensure consistent performance across releases.
 
 ## Contributing
 

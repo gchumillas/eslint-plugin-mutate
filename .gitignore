@@ -1,3 +1,28 @@
 node_modules
 package-lock.json
 CLAUDE.md
+
+# Benchmark results (auto-generated)
+benchmarks/results/
+*.log
+*.json
+
+# Development files
+.DS_Store
+.vscode/
+.idea/
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
